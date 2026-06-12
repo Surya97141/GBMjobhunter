@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat /tmp/vite.log)",
+      "Read(//tmp/**)",
+      "Bash(curl -s --max-time 5 \"http://localhost:5173/src/main.jsx\")",
+      "Bash(curl -s --max-time 5 \"http://localhost:5173/src/context/ThemeContext.jsx\")",
+      "Bash(curl -s --max-time 5 \"http://localhost:5173/src/styles/global.css\")",
+      "Bash(curl -s --max-time 5 \"http://localhost:5173/src/styles/typography.css\")",
+      "Bash(curl -s --max-time 5 \"http://localhost:5173/src/styles/themes.css\")",
+      "Bash(curl -s --max-time 5 http://localhost:5173/src/components/Typography.jsx)",
+      "Bash(curl -s --max-time 5 http://localhost:5173/src/App.jsx)",
+      "Bash(echo \"exit: $?\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"d:\\\\GBMjobhunter\\\\web\\\\src\\\\components\\\\three\")"
+    ]
+  }
+}

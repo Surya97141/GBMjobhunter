@@ -1,0 +1,84 @@
+/* ─── RESET ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin:     0;
+  padding:    0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ─── BODY ────────────────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bg-primary);
+  color:            var(--text-primary);
+  font-family:      var(--font-body);
+  font-weight:      400;
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color var(--duration-base) var(--ease-base),
+    color            var(--duration-base) var(--ease-base);
+}
+
+/* ─── LINKS ───────────────────────────────────────────────────────────────── */
+a {
+  color:           var(--accent);
+  text-decoration: none;
+  transition:      color var(--duration-fast) var(--ease-base);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+/* ─── MEDIA ───────────────────────────────────────────────────────────────── */
+img, video {
+  max-width: 100%;
+  display:   block;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────────────────────── */
+button {
+  cursor:      pointer;
+  font-family: var(--font-body);
+  border:      none;
+  background:  none;
+}
+
+/* ─── SELECTION ───────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--accent-subtle);
+  color:      var(--text-primary);
+}
+
+/* ─── FOCUS ───────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline:        2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius:  4px;
+}
+
+/* ─── SCROLLBARS (obsidian) ───────────────────────────────────────────────── */
+[data-theme="obsidian"] ::-webkit-scrollbar        { width: 6px; }
+[data-theme="obsidian"] ::-webkit-scrollbar-track  { background: var(--bg-surface); }
+[data-theme="obsidian"] ::-webkit-scrollbar-thumb  {
+  background:    var(--border-strong);
+  border-radius: 3px;
+}
+[data-theme="obsidian"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── SCROLLBARS (cream) ──────────────────────────────────────────────────── */
+[data-theme="cream"] ::-webkit-scrollbar        { width: 6px; }
+[data-theme="cream"] ::-webkit-scrollbar-track  { background: var(--bg-surface); }
+[data-theme="cream"] ::-webkit-scrollbar-thumb  {
+  background:    var(--border-strong);
+  border-radius: 3px;
+}
+[data-theme="cream"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

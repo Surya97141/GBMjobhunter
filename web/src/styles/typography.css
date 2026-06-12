@@ -1,0 +1,82 @@
+/* ─── TYPE SCALE ──────────────────────────────────────────────────────────── */
+.t-hero {
+  font-family:    var(--font-heading);
+  font-size:      clamp(40px, 7vw, 110px);
+  font-weight:    700;
+  line-height:    1.05;
+  letter-spacing: -0.02em;
+  color:          var(--text-primary);
+}
+
+.t-display {
+  font-family:    var(--font-heading);
+  font-size:      clamp(28px, 4vw, 64px);
+  font-weight:    700;
+  line-height:    1.1;
+  letter-spacing: -0.015em;
+  color:          var(--text-primary);
+}
+
+.t-heading {
+  font-family:    var(--font-heading);
+  font-size:      clamp(20px, 2.5vw, 32px);
+  font-weight:    700;
+  line-height:    1.2;
+  letter-spacing: -0.01em;
+  color:          var(--text-primary);
+}
+
+.t-subheading {
+  font-family: var(--font-body);
+  font-size:   18px;
+  font-weight: 400;
+  line-height: 1.5;
+  color:       var(--text-primary);
+}
+
+.t-body {
+  font-family: var(--font-body);
+  font-size:   16px;
+  font-weight: 400;
+  line-height: 1.75;
+  color:       var(--text-primary);
+}
+
+.t-small {
+  font-family: var(--font-body);
+  font-size:   14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color:       var(--text-primary);
+}
+
+.t-label {
+  font-family:     var(--font-body);
+  font-size:       12px;
+  font-weight:     500;
+  letter-spacing:  0.07em;
+  text-transform:  uppercase;
+  color:           var(--text-primary);
+}
+
+.t-micro {
+  font-family:    var(--font-body);
+  font-size:      11px;
+  font-weight:    400;
+  letter-spacing: 0.03em;
+  color:          var(--text-primary);
+}
+
+/* ─── COLOUR MODIFIERS ────────────────────────────────────────────────────── */
+.t-secondary { color: var(--text-secondary); }
+.t-muted     { color: var(--text-muted);     }
+.t-accent    { color: var(--accent);         }
+.t-high      { color: var(--color-high);     }
+.t-mid       { color: var(--color-mid);      }
+.t-low       { color: var(--color-low);      }
+
+/* ─── OBSIDIAN: HERO AND DISPLAY GET ITALIC ───────────────────────────────── */
+[data-theme="obsidian"] .t-hero,
+[data-theme="obsidian"] .t-display {
+  font-style: italic;
+}

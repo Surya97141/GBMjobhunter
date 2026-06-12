@@ -1,0 +1,104 @@
+/* ─── OBSIDIAN ────────────────────────────────────────────────────────────── */
+[data-theme="obsidian"] {
+  --bg-primary:        #000000;
+  --bg-surface:        #0a0a0a;
+  --bg-card:           #111111;
+  --bg-overlay:        rgba(0, 0, 0, 0.85);
+
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --border-card:       rgba(255, 255, 255, 0.10);
+  --border-strong:     rgba(255, 255, 255, 0.20);
+
+  --text-primary:      #ffffff;
+  --text-secondary:    rgba(255, 255, 255, 0.55);
+  --text-muted:        rgba(255, 255, 255, 0.22);
+  --text-inverse:      #000000;
+
+  --accent:            #a78bfa;
+  --accent-hover:      #c4b5fd;
+  --accent-subtle:     rgba(167, 139, 250, 0.12);
+
+  --color-high:        #34d399;
+  --color-mid:         #fbbf24;
+  --color-low:         #f87171;
+  --color-high-subtle: rgba(52, 211, 153, 0.12);
+  --color-mid-subtle:  rgba(251, 191, 36, 0.12);
+  --color-low-subtle:  rgba(248, 113, 113, 0.12);
+
+  --font-heading:      'Playfair Display', Georgia, serif;
+  --font-body:         'Inter', system-ui, sans-serif;
+
+  --duration-fast:     200ms;
+  --duration-base:     350ms;
+  --ease-base:         cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── CREAM ───────────────────────────────────────────────────────────────── */
+[data-theme="cream"] {
+  --bg-primary:        #faf8f3;
+  --bg-surface:        #f5f0e8;
+  --bg-card:           #ffffff;
+  --bg-overlay:        rgba(250, 248, 243, 0.92);
+
+  --border-subtle:     rgba(0, 0, 0, 0.06);
+  --border-card:       rgba(0, 0, 0, 0.09);
+  --border-strong:     rgba(0, 0, 0, 0.18);
+
+  --text-primary:      #1a1814;
+  --text-secondary:    #6b6560;
+  --text-muted:        #b5b0a8;
+  --text-inverse:      #ffffff;
+
+  --accent:            #c17f3a;
+  --accent-hover:      #a06830;
+  --accent-subtle:     rgba(193, 127, 58, 0.10);
+
+  --color-high:        #5a8a62;
+  --color-mid:         #c17f3a;
+  --color-low:         #b85450;
+  --color-high-subtle: rgba(90, 138, 98, 0.10);
+  --color-mid-subtle:  rgba(193, 127, 58, 0.10);
+  --color-low-subtle:  rgba(184, 84, 80, 0.10);
+
+  --font-heading:      'Playfair Display', Georgia, serif;
+  --font-body:         'Inter', system-ui, sans-serif;
+
+  --duration-fast:     200ms;
+  --duration-base:     350ms;
+  --ease-base:         cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── EXTENSION MINIMAL ───────────────────────────────────────────────────── */
+[data-theme="extension"] {
+  --bg-primary:        #ffffff;
+  --bg-surface:        #f7f7f7;
+  --bg-card:           #ffffff;
+  --bg-overlay:        rgba(0, 0, 0, 0.50);
+
+  --border-subtle:     #eeeeee;
+  --border-card:       #e5e5e5;
+  --border-strong:     #cccccc;
+
+  --text-primary:      #111111;
+  --text-secondary:    #555555;
+  --text-muted:        #999999;
+  --text-inverse:      #ffffff;
+
+  --accent:            #4f46e5;
+  --accent-hover:      #4338ca;
+  --accent-subtle:     rgba(79, 70, 229, 0.08);
+
+  --color-high:        #16a34a;
+  --color-mid:         #d97706;
+  --color-low:         #dc2626;
+  --color-high-subtle: rgba(22, 163, 74, 0.08);
+  --color-mid-subtle:  rgba(217, 119, 6, 0.08);
+  --color-low-subtle:  rgba(220, 38, 38, 0.08);
+
+  --font-heading:      'Inter', system-ui, sans-serif;
+  --font-body:         'Inter', system-ui, sans-serif;
+
+  --duration-fast:     150ms;
+  --duration-base:     150ms;
+  --ease-base:         cubic-bezier(0.4, 0, 0.2, 1);
+}
