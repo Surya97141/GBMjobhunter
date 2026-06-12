@@ -2,6 +2,7 @@ import { useEffect, useRef, lazy, Suspense } from 'react';
 import * as THREE from 'three';
 import NET from 'vanta/dist/vanta.net.min';
 import { Label, Hero, Body } from '../components/Typography';
+import ManifestoSection from './landing/ManifestoSection';
 import styles from './LandingPage.module.css';
 
 const ChromeSphere = lazy(() => import('../components/three/ChromeSphere'));
@@ -33,6 +34,8 @@ export default function LandingPage() {
 
   return (
     <div data-theme="obsidian">
+
+      {/* ── HERO ── */}
       <section className={styles.hero} ref={sectionRef}>
         <div className={styles.heroContent}>
 
@@ -64,6 +67,10 @@ export default function LandingPage() {
 
         </div>
       </section>
+
+      {/* ── SCROLL REVEAL ── */}
+      <ManifestoSection />
+
     </div>
   );
 }

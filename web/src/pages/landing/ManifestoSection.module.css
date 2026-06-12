@@ -1,0 +1,44 @@
+/* ─── MANIFESTO ────────────────────────────────────────────────────────────── */
+
+.section {
+  background: var(--bg-primary);
+  padding: 160px 64px;
+}
+
+.inner {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.overline {
+  display: block;
+  margin-bottom: 56px;
+  letter-spacing: 0.14em;
+}
+
+/* The three lines sit tight together — visual rhythm of a poem */
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 56px;
+}
+
+/* Border-left callout separates the resolution from the problem lines */
+.sub {
+  max-width: 520px;
+  border-left: 1px solid var(--border-strong);
+  padding-left: 24px;
+}
+
+/* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .section {
+    padding: 96px 24px;
+  }
+
+  .sub {
+    max-width: 100%;
+  }
+}
