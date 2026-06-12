@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "GBM Job Hunter",
+  "version": "1.0.0",
+  "description": "Auto-fill job applications and track outcomes",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["https://*/*"],
+  "background": {
+    "service_worker": "src/background/index.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*"],
+      "js": ["src/content/index.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/index.html"
+  }
+}

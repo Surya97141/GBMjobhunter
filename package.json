@@ -1,0 +1,17 @@
+{
+  "name": "gbmjobhunter",
+  "private": true,
+  "workspaces": [
+    "gateway",
+    "services/user",
+    "services/jobs",
+    "services/opportunity",
+    "services/intelligence",
+    "web",
+    "mobile",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "docker-compose up -d"
+  }
+}

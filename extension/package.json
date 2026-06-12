@@ -1,0 +1,14 @@
+{
+  "name": "@gbm/extension",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "web-ext run",
+    "build": "web-ext build"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "web-ext": "^7.8.0"
+  }
+}
