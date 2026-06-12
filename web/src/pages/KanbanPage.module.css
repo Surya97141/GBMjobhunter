@@ -1,0 +1,43 @@
+/* ─── KANBAN PAGE ──────────────────────────────────────────────────────────── */
+
+.content {
+  padding: 48px 48px 80px;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.pageHeader {
+  margin-bottom: 32px;
+}
+
+/* Horizontal scrolling board — columns never compress */
+.board {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 24px; /* room for horizontal scrollbar */
+  align-items: flex-start;
+  /* Smooth momentum scroll on touch/trackpad */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar visually but keep it functional */
+.board::-webkit-scrollbar {
+  height: 4px;
+}
+
+.board::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.board::-webkit-scrollbar-thumb {
+  background: var(--border-card);
+  border-radius: 2px;
+}
+
+@media (max-width: 1024px) {
+  .content {
+    padding: 32px;
+  }
+}

@@ -1,0 +1,21 @@
+/* ─── SHARED DASHBOARD SHELL ───────────────────────────────────────────────── */
+
+/* Two-column grid: sidebar + child page via <Outlet> */
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 220px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

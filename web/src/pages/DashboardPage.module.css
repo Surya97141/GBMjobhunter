@@ -1,0 +1,109 @@
+/* ─── CONTENT AREA ─────────────────────────────────────────────────────────── */
+
+.content {
+  padding: 48px 48px 80px;
+  min-width: 0; /* prevents grid blowout on wide tables */
+}
+
+/* ─── PAGE HEADER ──────────────────────────────────────────────────────────── */
+
+.pageHeader {
+  margin-bottom: 40px;
+}
+
+.greeting {
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ─── TOP ROW: ATS card + quick stats ─────────────────────────────────────── */
+
+.topRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+/* Shadow transitions so theme switching animates smoothly */
+.atsCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-base) var(--ease-base);
+}
+
+/* ─── QUICK STATS ──────────────────────────────────────────────────────────── */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-content: start;
+}
+
+.statCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-base) var(--ease-base),
+              transform var(--duration-fast) var(--ease-base);
+}
+
+.statCard:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.statValue {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.statLabel {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ─── APPLICATION LIST CARD ────────────────────────────────────────────────── */
+
+/* Card wrapper so the list gets the same elevated treatment as other cards */
+.listCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 28px 32px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-base) var(--ease-base);
+}
+
+/* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .content {
+    padding: 32px;
+  }
+
+  .topRow {
+    grid-template-columns: 1fr;
+  }
+
+  .atsCard {
+    width: fit-content;
+  }
+}

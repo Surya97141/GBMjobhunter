@@ -1,0 +1,148 @@
+/* ─── APPLICATION LIST ─────────────────────────────────────────────────────── */
+
+.section {
+  margin-top: 40px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.viewAll {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: opacity var(--duration-fast) var(--ease-base);
+}
+
+.viewAll:hover { opacity: 0.7; }
+
+/* ─── TABLE ────────────────────────────────────────────────────────────────── */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Column header row */
+.thead th {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 0 16px 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.thead th:last-child { padding-right: 0; }
+
+/* Data rows */
+.tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--duration-fast) var(--ease-base);
+}
+
+.tbody tr:hover {
+  background: var(--accent-subtle);
+}
+
+.tbody td {
+  padding: 14px 16px 14px 0;
+  vertical-align: middle;
+}
+
+.tbody td:last-child { padding-right: 0; }
+
+/* ─── COMPANY CELL ─────────────────────────────────────────────────────────── */
+
+.companyCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 160px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--border-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.companyName {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ─── OTHER CELLS ──────────────────────────────────────────────────────────── */
+
+.role {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  min-width: 200px;
+}
+
+.atsScore {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Status badge using data-status so CSS can target by value */
+.statusBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.statusBadge[data-status="interview"],
+.statusBadge[data-status="offer"] {
+  color: var(--color-high);
+  background: var(--color-high-subtle);
+}
+
+.statusBadge[data-status="pending"] {
+  color: var(--color-mid);
+  background: var(--color-mid-subtle);
+}
+
+.statusBadge[data-status="ghosted"],
+.statusBadge[data-status="rejected"] {
+  color: var(--color-low);
+  background: var(--color-low-subtle);
+}
+
+.date {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}

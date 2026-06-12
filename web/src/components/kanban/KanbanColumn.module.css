@@ -1,0 +1,71 @@
+/* ─── KANBAN COLUMN ────────────────────────────────────────────────────────── */
+
+.column {
+  flex-shrink: 0;
+  width: 280px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+/* ─── COLUMN HEADER ────────────────────────────────────────────────────────── */
+
+.header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Colour dot identifies column status */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot[data-column="applied"]     { background: var(--color-mid);  }
+.dot[data-column="interviewing"] { background: var(--accent);     }
+.dot[data-column="offer"]        { background: var(--color-high); }
+.dot[data-column="rejected"]     { background: var(--color-low);  }
+
+.title {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+.count {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--border-subtle);
+  padding: 1px 7px;
+  border-radius: 100px;
+}
+
+/* ─── DROPPABLE CARD LIST ──────────────────────────────────────────────────── */
+
+.cardList {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 64px; /* keeps empty columns droppable */
+  border-radius: 0 0 10px 10px;
+  transition: background var(--duration-fast) var(--ease-base);
+}
+
+/* Subtle accent tint when a card is hovering over this column */
+.cardListDraggingOver {
+  background: var(--accent-subtle);
+}

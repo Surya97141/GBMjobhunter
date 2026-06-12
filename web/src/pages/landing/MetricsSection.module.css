@@ -1,0 +1,82 @@
+/* ─── METRICS ──────────────────────────────────────────────────────────────── */
+
+/* bg-surface (#0a0a0a) gives a hair of lift from the manifesto's bg-primary (#000) */
+.section {
+  background: var(--bg-surface);
+  padding: 120px 64px;
+}
+
+.header {
+  text-align: center;
+  margin: 0 auto 64px;
+  max-width: 600px;
+}
+
+.overline {
+  display: block;
+  margin-bottom: 16px;
+  letter-spacing: 0.14em;
+}
+
+/* Reset ul so the motion.ul doesn't carry browser list styles */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  list-style: none;
+  padding: 0;
+}
+
+/* ─── CARD ─────────────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+
+/* 2px accent stripe across the top of every card */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+.metric {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 24px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

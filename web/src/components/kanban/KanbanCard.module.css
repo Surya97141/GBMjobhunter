@@ -1,0 +1,107 @@
+/* ─── KANBAN CARD ──────────────────────────────────────────────────────────── */
+
+/*
+ * The outer .wrapper is the dnd-controlled element (receives transform from
+ * @hello-pangea/dnd). The visual .card is nested inside so vanilla-tilt can
+ * apply its own transform without fighting the drag transform.
+ */
+.wrapper {
+  /* no visual styles — dnd owns this element */
+}
+
+/* ── Cream card: white + warm shadow ──────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: grab;
+  user-select: none;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-fast) var(--ease-base),
+              border-color var(--duration-fast) var(--ease-base);
+}
+
+.card:active { cursor: grabbing; }
+
+/* ── Obsidian card: glass ─────────────────────────────────────────────────── */
+:global([data-theme="obsidian"]) .card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(167, 139, 250, 0.07);
+}
+
+/* ── Drag state ───────────────────────────────────────────────────────────── */
+.dragging {
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-strong);
+}
+
+:global([data-theme="obsidian"]) .dragging {
+  box-shadow: 0 8px 32px rgba(167, 139, 250, 0.22);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ─── CARD CONTENT ─────────────────────────────────────────────────────────── */
+
+.companyRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: var(--accent-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.company {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.role {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.atsScore {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.date {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+}

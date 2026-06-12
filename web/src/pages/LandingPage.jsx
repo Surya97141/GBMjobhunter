@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import NET from 'vanta/dist/vanta.net.min';
 import { Label, Hero, Body } from '../components/Typography';
 import ManifestoSection from './landing/ManifestoSection';
+import MetricsSection from './landing/MetricsSection';
+import FeaturesSection from './landing/FeaturesSection';
 import styles from './LandingPage.module.css';
 
 const ChromeSphere = lazy(() => import('../components/three/ChromeSphere'));
@@ -70,6 +72,12 @@ export default function LandingPage() {
 
       {/* ── SCROLL REVEAL ── */}
       <ManifestoSection />
+
+      {/* ── METRICS ── */}
+      <MetricsSection />
+
+      {/* ── FEATURES ACCORDION ── */}
+      <FeaturesSection />
 
     </div>
   );

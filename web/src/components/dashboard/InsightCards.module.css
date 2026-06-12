@@ -1,0 +1,143 @@
+/* ─── INSIGHT CARDS ────────────────────────────────────────────────────────── */
+
+.section {
+  margin-top: 32px;
+  list-style: none;
+  padding: 0;
+}
+
+/* Obsidian: loose radial glow gives backdrop-filter something to blur */
+:global([data-theme="obsidian"]) .section {
+  background: radial-gradient(
+    ellipse at 50% 20%,
+    rgba(167, 139, 250, 0.07) 0%,
+    transparent 65%
+  );
+  border-radius: 20px;
+  padding: 24px 0 8px;
+  margin-top: 8px;
+}
+
+/* ─── SECTION HEADER ───────────────────────────────────────────────────────── */
+
+.sectionHeader {
+  margin-bottom: 20px;
+}
+
+/* ─── CARD GRID ────────────────────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ─── CARD BASE — cream theme ─────────────────────────────────────────────── */
+
+/*
+ * Cream: white card elevated by --shadow-card (warm three-layer shadow).
+ * Obsidian overrides below with glass treatment.
+ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-base) var(--ease-base),
+              transform    var(--duration-fast) var(--ease-base);
+  cursor: default;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/* ─── CARD — obsidian glassmorphism override ──────────────────────────────── */
+
+/*
+ * Glassmorphism requires:
+ *   1. Semi-transparent background so the blur shows layers beneath
+ *   2. backdrop-filter: blur() to frost what's behind the card
+ *   3. A visible border acting as the "glass edge"
+ *   4. A coloured glow shadow to separate the card from pure black
+ * The radial gradient on .section provides the visual "surface" being blurred.
+ */
+:global([data-theme="obsidian"]) .card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 24px rgba(167, 139, 250, 0.10);
+}
+
+:global([data-theme="obsidian"]) .card:hover {
+  box-shadow: 0 8px 32px rgba(167, 139, 250, 0.18);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* ─── CARD INTERNALS ───────────────────────────────────────────────────────── */
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.category {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Confidence dot pushed to the far right via margin-left: auto */
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.dot[data-confidence="high"] { background: var(--color-high); }
+.dot[data-confidence="mid"]  { background: var(--color-mid);  }
+.dot[data-confidence="low"]  { background: var(--color-low);  }
+
+.headline {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-primary);
+  margin: 0 0 10px;
+}
+
+.detail {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

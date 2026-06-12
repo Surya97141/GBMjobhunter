@@ -1,0 +1,163 @@
+/* ─── FEATURES ACCORDION ───────────────────────────────────────────────────── */
+
+.section {
+  background: var(--bg-primary);
+  padding: 120px 64px;
+}
+
+.header {
+  max-width: 1280px;
+  margin: 0 auto 64px;
+}
+
+.overline {
+  display: block;
+  margin-bottom: 16px;
+  letter-spacing: 0.14em;
+}
+
+/* ─── ACCORDION LIST ───────────────────────────────────────────────────────── */
+
+.list {
+  max-width: 1280px;
+  margin: 0 auto;
+  list-style: none;
+  padding: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.row {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ─── TRIGGER ──────────────────────────────────────────────────────────────── */
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Index and title colour shift when row is open or hovered */
+.trigger:hover .index,
+.trigger[aria-expanded="true"] .index {
+  color: var(--accent);
+  transition: color var(--duration-fast) var(--ease-base);
+}
+
+.trigger:hover .titleText,
+.trigger[aria-expanded="true"] .titleText {
+  color: var(--accent);
+  transition: color var(--duration-fast) var(--ease-base);
+}
+
+/* Fixed-width index column — body content aligns with title (48 + 24 = 72px offset) */
+.index {
+  flex-shrink: 0;
+  width: 48px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  transition: color var(--duration-fast) var(--ease-base);
+}
+
+.titleText {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-size: clamp(22px, 2.5vw, 36px);
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: color var(--duration-fast) var(--ease-base);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--accent);
+  line-height: 1;
+  /* rotation is controlled by Framer Motion inline style */
+}
+
+/* ─── EXPANDED BODY ────────────────────────────────────────────────────────── */
+
+/* overflow:hidden lives on the Framer Motion wrapper (inline), not here */
+.body {
+  padding: 0 0 40px 72px; /* 72px = 48px index + 24px gap, aligns with title */
+  display: flex;
+  gap: 80px;
+  align-items: flex-start;
+}
+
+.description {
+  flex: 1;
+  max-width: 520px;
+  /* inherits t-body t-secondary from Typography component */
+}
+
+/* ─── CAPABILITY TAGS ──────────────────────────────────────────────────────── */
+
+.tagList {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 360px;
+  padding-top: 4px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6px 16px;
+  border: 1px solid var(--border-card);
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+/* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .body {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .tagList {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 24px;
+  }
+
+  .body {
+    padding-left: 0;
+  }
+
+  .index {
+    display: none;
+  }
+
+  .trigger {
+    gap: 0;
+  }
+}
