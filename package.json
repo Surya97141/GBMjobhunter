@@ -12,6 +12,13 @@
     "shared"
   ],
   "scripts": {
-    "dev": "docker-compose up -d"
+    "dev": "docker-compose up -d",
+    "migrate": "node scripts/migrate.js",
+    "setup:clickhouse": "node scripts/setup-clickhouse.js"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0",
+    "pg": "^8.11.0",
+    "@clickhouse/client": "^0.2.0"
   }
 }

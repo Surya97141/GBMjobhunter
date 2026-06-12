@@ -1,11 +1,24 @@
 require('dotenv').config();
-const express = require('express');
-const app = express();
 
-app.use(express.json());
+if (!process.env.DATABASE_URL)   throw new Error('DATABASE_URL env var is required');
+if (!process.env.REDIS_URL)      throw new Error('REDIS_URL env var is required');
+if (!process.env.CLICKHOUSE_URL) throw new Error('CLICKHOUSE_URL env var is required');
 
-const PORT = process.env.PORT || 3004;
+const { ping }               = require('./src/db/clickhouse');
+const { setupNightlySchedule } = require('./src/queues/scheduler');
 
-app.listen(PORT, () => {
-  console.log(`Intelligence Service running on port ${PORT}`);
+require('./src/queues/consumers');
+
+async function start() {
+  await ping();
+  console.log('Intelligence Service connected to ClickHouse');
+
+  await setupNightlySchedule();
+
+  console.log('Intelligence Service running — consuming events');
+}
+
+start().catch((err) => {
+  console.error('Intelligence Service failed to start:', err.message);
+  process.exit(1);
 });
