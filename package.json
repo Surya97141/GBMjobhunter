@@ -14,11 +14,14 @@
   "scripts": {
     "dev": "docker-compose up -d",
     "migrate": "node scripts/migrate.js",
-    "setup:clickhouse": "node scripts/setup-clickhouse.js"
+    "setup:clickhouse": "node scripts/setup-clickhouse.js",
+    "backend": "concurrently -n gateway,user,jobs,opportunity,intel -c cyan,green,yellow,blue,magenta \"npm run dev --workspace=@gbm/gateway\" \"npm run dev --workspace=@gbm/user-service\" \"npm run dev --workspace=@gbm/jobs-service\" \"npm run dev --workspace=@gbm/opportunity-service\" \"npm run dev --workspace=@gbm/intelligence-service\"",
+    "web": "npm run dev --workspace=@gbm/web"
   },
   "devDependencies": {
+    "@clickhouse/client": "^0.2.0",
+    "concurrently": "^10.0.3",
     "dotenv": "^16.0.0",
-    "pg": "^8.11.0",
-    "@clickhouse/client": "^0.2.0"
+    "pg": "^8.11.0"
   }
 }

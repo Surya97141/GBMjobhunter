@@ -15,7 +15,13 @@
       "PowerShell(New-Item -ItemType Directory -Force -Path \"d:\\\\GBMjobhunter\\\\web\\\\src\\\\pages\\\\landing\")",
       "PowerShell(New-Item -ItemType Directory -Force -Path \"d:\\\\GBMjobhunter\\\\web\\\\src\\\\components\\\\dashboard\")",
       "PowerShell(New-Item -ItemType Directory -Force -Path \"d:\\\\GBMjobhunter\\\\web\\\\src\\\\components\\\\kanban\")",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm test *)",
+      "Bash(npx jest *)",
+      "PowerShell(netstat -ano | Select-String \":5432|:6379\" | Where-Object { $_ -match \"LISTENING\" })",
+      "PowerShell(Get-Process -Id 25248, 31836 -ErrorAction SilentlyContinue)",
+      "PowerShell(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "PowerShell(cd D:\\\\GBMjobhunter; $env:NODE_ENV=\"development\"; npm run web 2>&1 | Select-Object -First 40)"
     ]
   }
 }

@@ -17,7 +17,14 @@ app.use((req, res) => {
   res.status(404).json({ status: 'error', message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`User Service running on port ${PORT}`);
-});
+// Export the app so Supertest can require() it without calling listen().
+// Only start the HTTP server when this file is the entry point (not when
+// required by a test file).
+module.exports = app;
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`User Service running on port ${PORT}`);
+  });
+}

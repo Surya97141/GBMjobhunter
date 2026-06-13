@@ -19,7 +19,11 @@ app.use((req, res) => {
   res.status(404).json({ status: 'error', message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`Jobs Service running on port ${PORT}`);
-});
+module.exports = app;
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3002;
+  app.listen(PORT, () => {
+    console.log(`Jobs Service running on port ${PORT}`);
+  });
+}
