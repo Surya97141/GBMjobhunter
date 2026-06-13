@@ -13,6 +13,11 @@
   top: 0;
   height: 100vh;
   overflow-y: auto;
+
+  /* Smooth background crossfade when theme switches */
+  transition:
+    background     var(--duration-base) var(--ease-base),
+    border-color   var(--duration-base) var(--ease-base);
 }
 
 /* ─── LOGO ─────────────────────────────────────────────────────────────────── */
@@ -50,7 +55,7 @@
   color: var(--text-secondary);
   text-decoration: none;
   transition: background var(--duration-fast) var(--ease-base),
-              color var(--duration-fast) var(--ease-base);
+              color     var(--duration-fast) var(--ease-base);
 }
 
 .navItem:hover {
@@ -64,12 +69,43 @@
   font-weight: 500;
 }
 
+/* ─── THEME TOGGLE ─────────────────────────────────────────────────────────── */
+
+/*
+ * Styled to match .navItem so it reads as part of the navigation group.
+ * Lives between the nav links and the user info footer.
+ */
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-base),
+              color     var(--duration-fast) var(--ease-base);
+}
+
+.themeToggle:hover {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
 /* ─── USER INFO ────────────────────────────────────────────────────────────── */
 
 .userInfo {
   padding: 20px 12px 0;
   border-top: 1px solid var(--border-subtle);
-  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 2px;

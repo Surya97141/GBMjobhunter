@@ -3,7 +3,7 @@
   "name": "GBM Job Hunter",
   "version": "1.0.0",
   "description": "Auto-fill job applications and track outcomes",
-  "permissions": ["activeTab", "storage", "scripting"],
+  "permissions": ["activeTab", "storage", "scripting", "tabs"],
   "host_permissions": ["https://*/*"],
   "background": {
     "service_worker": "src/background/index.js"

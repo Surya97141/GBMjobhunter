@@ -1,0 +1,30 @@
+/* ─── WORLD GLOBE ──────────────────────────────────────────────────────────── */
+
+/*
+ * react-globe.gl auto-sizes its canvas to its direct parent container.
+ * This div provides the fixed height; the globe fills the width automatically.
+ */
+.container {
+  width: 100%;
+  height: 540px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  position: relative;
+}
+
+/* Loading state — shown via Suspense fallback in the parent */
+.placeholder {
+  width: 100%;
+  height: 540px;
+  border-radius: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+}

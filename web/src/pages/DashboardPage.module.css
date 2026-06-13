@@ -26,7 +26,7 @@
   align-items: start;
 }
 
-/* Shadow transitions so theme switching animates smoothly */
+/* Shadow + background transition so theme switching animates smoothly */
 .atsCard {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
@@ -36,7 +36,9 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-card);
-  transition: box-shadow var(--duration-base) var(--ease-base);
+  transition: box-shadow  var(--duration-base) var(--ease-base),
+              background  var(--duration-base) var(--ease-base),
+              border-color var(--duration-base) var(--ease-base);
 }
 
 /* ─── QUICK STATS ──────────────────────────────────────────────────────────── */
@@ -54,8 +56,10 @@
   border-radius: 10px;
   padding: 24px;
   box-shadow: var(--shadow-card);
-  transition: box-shadow var(--duration-base) var(--ease-base),
-              transform var(--duration-fast) var(--ease-base);
+  transition: box-shadow   var(--duration-base) var(--ease-base),
+              background   var(--duration-base) var(--ease-base),
+              border-color var(--duration-base) var(--ease-base),
+              transform    var(--duration-fast) var(--ease-base);
 }
 
 .statCard:hover {
@@ -89,7 +93,24 @@
   border-radius: 10px;
   padding: 28px 32px;
   box-shadow: var(--shadow-card);
-  transition: box-shadow var(--duration-base) var(--ease-base);
+  transition: box-shadow   var(--duration-base) var(--ease-base),
+              background   var(--duration-base) var(--ease-base),
+              border-color var(--duration-base) var(--ease-base);
+}
+
+/* ─── CROSS-THEME AUDIT ────────────────────────────────────────────────────── */
+
+/*
+ * Obsidian "goes straight to data" — the Playfair greeting is a warm, personal
+ * touch that fits cream's editorial feel. Obsidian skips it and opens on data.
+ * The subtitle Body text ("Here's your job search at a glance.") remains.
+ */
+:global([data-theme="obsidian"]) .greeting {
+  display: none;
+}
+
+:global([data-theme="obsidian"]) .pageHeader {
+  margin-bottom: 24px;
 }
 
 /* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GBM Job Hunter</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- ── STATE 1: Unauthenticated ─────────────────────────────────────────── -->
+  <div id="state-auth" class="state">
+    <div class="center-layout">
+
+      <div class="auth-brand">
+        <span class="brand-dot"></span>
+        <span class="brand-wordmark">GBM</span>
+      </div>
+
+      <p class="auth-title">Track your job search<br>with intelligence.</p>
+
+      <button id="btn-signin" class="btn btn-primary btn-full">Sign in to GBM</button>
+
+      <p class="auth-footer">
+        Don't have an account?
+        <a id="link-signup" href="#" class="link">Sign up</a>
+      </p>
+
+    </div>
+  </div>
+
+  <!-- ── STATE 2: Authenticated — not on a job page ────────────────────────── -->
+  <div id="state-idle" class="state">
+
+    <header class="popup-header">
+      <span class="brand-wordmark">GBM</span>
+      <div class="avatar" id="avatar-idle">S</div>
+    </header>
+
+    <div class="center-layout">
+
+      <!-- Magnifying glass icon — indicates "searching" context -->
+      <svg class="idle-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <circle cx="27" cy="27" r="17" stroke="#e5e7eb" stroke-width="3"/>
+        <circle cx="27" cy="27" r="10" stroke="#4f46e5" stroke-width="2.5" opacity="0.35"/>
+        <line x1="39" y1="39" x2="55" y2="55" stroke="#4f46e5" stroke-width="3.5"
+              stroke-linecap="round"/>
+      </svg>
+
+      <p class="idle-title">Navigate to a job listing</p>
+      <p class="idle-sub">
+        Open any job page to see ATS insights and auto-fill options.
+      </p>
+      <p class="current-domain" id="current-domain"></p>
+
+    </div>
+  </div>
+
+  <!-- ── STATE 3: Job page detected ───────────────────────────────────────── -->
+  <div id="state-job" class="state">
+
+    <header class="popup-header">
+      <span class="brand-wordmark">GBM</span>
+      <div class="avatar" id="avatar-job">S</div>
+    </header>
+
+    <div class="job-badge">
+      <span class="badge-dot"></span>
+      Job detected
+    </div>
+
+    <div class="job-info">
+      <p class="job-company" id="job-company"></p>
+      <p class="job-role"    id="job-role"></p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ats-section">
+      <p class="section-label">ATS Match</p>
+      <div class="ats-row">
+
+        <!--
+          SVG ring: r=36, circumference ≈ 226.19.
+          stroke-dashoffset is set by JS: 226.19 × (1 − score/100).
+          rotate(-90) starts the arc at 12 o'clock.
+        -->
+        <svg class="ats-ring" viewBox="0 0 88 88" width="88" height="88"
+             role="img" aria-labelledby="ats-ring-title">
+          <title id="ats-ring-title">ATS match score</title>
+          <!-- Track -->
+          <circle cx="44" cy="44" r="36" fill="none"
+                  stroke="#e5e7eb" stroke-width="8"/>
+          <!-- Fill — colour and dashoffset set by JS -->
+          <circle id="ats-ring-fill" cx="44" cy="44" r="36" fill="none"
+                  stroke="#10b981" stroke-width="8" stroke-linecap="round"
+                  stroke-dasharray="226.19" stroke-dashoffset="226.19"
+                  transform="rotate(-90 44 44)"/>
+          <!-- Score label -->
+          <text id="ats-score-text"
+                x="44" y="44"
+                text-anchor="middle" dominant-baseline="central"
+                font-size="18" font-weight="700"
+                font-family="system-ui, sans-serif"
+                fill="#10b981">—</text>
+        </svg>
+
+        <div class="ats-details">
+          <p class="ats-label" id="ats-label"></p>
+          <p class="ats-sub"   id="ats-sub"></p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="actions">
+      <button id="btn-autofill" class="btn btn-primary   btn-full">Auto-fill Application</button>
+      <button id="btn-log"      class="btn btn-secondary btn-full">Log as Applied</button>
+    </div>
+
+  </div>
+
+  <!-- ── STATE 4: Auto-fill in progress ───────────────────────────────────── -->
+  <div id="state-filling" class="state">
+
+    <header class="popup-header">
+      <span class="brand-wordmark">GBM</span>
+      <div class="avatar" id="avatar-filling">S</div>
+    </header>
+
+    <div class="filling-content">
+
+      <p class="filling-title">Filling application…</p>
+      <p class="filling-sub" id="fill-sub"></p>
+
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <span class="progress-label" id="progress-label"></span>
+      </div>
+
+      <!-- Field rows injected by JS -->
+      <ul class="field-list" id="field-list" aria-label="Fields being filled"></ul>
+
+      <button id="btn-cancel" class="btn btn-outline btn-full">Cancel</button>
+
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

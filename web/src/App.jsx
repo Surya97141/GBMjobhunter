@@ -4,9 +4,10 @@ import { AnimatePresence } from 'framer-motion';
 import PageTransition from './components/PageTransition';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 
-const LandingPage   = lazy(() => import('./pages/LandingPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const KanbanPage    = lazy(() => import('./pages/KanbanPage'));
+const LandingPage    = lazy(() => import('./pages/LandingPage'));
+const DashboardPage  = lazy(() => import('./pages/DashboardPage'));
+const KanbanPage     = lazy(() => import('./pages/KanbanPage'));
+const InsightsPage   = lazy(() => import('./pages/InsightsPage'));
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -47,6 +48,14 @@ function AnimatedRoutes() {
             element={
               <Suspense fallback={null}>
                 <KanbanPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="insights"
+            element={
+              <Suspense fallback={null}>
+                <InsightsPage />
               </Suspense>
             }
           />
