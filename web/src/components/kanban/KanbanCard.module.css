@@ -90,14 +90,27 @@
   justify-content: space-between;
 }
 
-.atsScore {
+.atsBadge {
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 500;
-  color: var(--accent);
-  background: var(--accent-subtle);
   padding: 2px 8px;
   border-radius: 4px;
+}
+
+.atsBadge[data-level="high"] {
+  color: var(--color-high);
+  background: var(--color-high-subtle);
+}
+
+.atsBadge[data-level="mid"] {
+  color: var(--color-mid);
+  background: var(--color-mid-subtle);
+}
+
+.atsBadge[data-level="low"] {
+  color: var(--color-low);
+  background: var(--color-low-subtle);
 }
 
 .date {

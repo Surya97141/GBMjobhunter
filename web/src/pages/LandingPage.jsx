@@ -1,4 +1,5 @@
 import { useEffect, useRef, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import NET from 'vanta/dist/vanta.net.min';
 import { Label, Hero, Body } from '../components/Typography';
@@ -10,7 +11,8 @@ import styles from './LandingPage.module.css';
 const ChromeSphere = lazy(() => import('../components/three/ChromeSphere'));
 
 export default function LandingPage() {
-  const sectionRef = useRef(null);
+  const navigate    = useNavigate();
+  const sectionRef  = useRef(null);
   const vantaEffect = useRef(null);
 
   useEffect(() => {
@@ -56,8 +58,8 @@ export default function LandingPage() {
             </Body>
 
             <div className={styles.ctaGroup}>
-              <button className={styles.ctaFilled}>Get Started</button>
-              <button className={styles.ctaGhost}>See How It Works</button>
+              <button className={styles.ctaFilled} onClick={() => navigate('/register')}>Get Started</button>
+              <button className={styles.ctaGhost}  onClick={() => navigate('/login')}>Sign In</button>
             </div>
           </div>
 

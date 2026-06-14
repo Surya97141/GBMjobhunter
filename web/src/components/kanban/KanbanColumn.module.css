@@ -29,10 +29,11 @@
   flex-shrink: 0;
 }
 
-.dot[data-column="applied"]     { background: var(--color-mid);  }
-.dot[data-column="interviewing"] { background: var(--accent);     }
-.dot[data-column="offer"]        { background: var(--color-high); }
-.dot[data-column="rejected"]     { background: var(--color-low);  }
+.dot[data-column="pending"]   { background: var(--color-mid);  }
+.dot[data-column="interview"] { background: var(--accent);     }
+.dot[data-column="offer"]     { background: var(--color-high); }
+.dot[data-column="rejected"]  { background: var(--color-low);  }
+.dot[data-column="ghosted"]   { background: var(--text-muted); }
 
 .title {
   font-family: var(--font-body);
@@ -68,4 +69,23 @@
 /* Subtle accent tint when a card is hovering over this column */
 .cardListDraggingOver {
   background: var(--accent-subtle);
+}
+
+/* ─── EMPTY STATE ──────────────────────────────────────────────────────────── */
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: 6px;
+  min-height: 80px;
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  user-select: none;
 }

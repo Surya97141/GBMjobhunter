@@ -1,0 +1,328 @@
+/* ─── PAGE SHELL ─────────────────────────────────────────────────────────────── */
+
+.page {
+  flex: 1;
+  padding: 40px 48px;
+  overflow-y: auto;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.pageHeader {
+  margin-bottom: 32px;
+}
+
+.pageTitle {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.pageSubtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.loadingText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 40px;
+}
+
+/* ─── TWO-COLUMN GRID ────────────────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.leftCol,
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── CARD ────────────────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+:global([data-theme="obsidian"]) .card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 24px rgba(167, 139, 250, 0.10);
+}
+
+.cardTitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+.cardHint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: -8px 0 16px;
+}
+
+/* ─── DROPZONE ───────────────────────────────────────────────────────────────── */
+
+.dropzone {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 10px;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-base),
+    background   var(--duration-fast) var(--ease-base);
+  text-align: center;
+  user-select: none;
+}
+
+.dropzone:hover,
+.dropzone:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  outline: none;
+}
+
+.dropzoneDragging {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.fileInput {
+  display: none;
+}
+
+.dropzoneIcon {
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.dropzoneText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.dropzoneHint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.dropzoneError {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-low);
+  margin-top: 4px;
+}
+
+.uploadedNote {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-high);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* ─── ATS RING WRAPPER ───────────────────────────────────────────────────────── */
+
+.ringWrap {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+/* ─── SKILLS CHIPS ───────────────────────────────────────────────────────────── */
+
+.chips {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+/* ─── WORK EXPERIENCE ────────────────────────────────────────────────────────── */
+
+.expList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.expItem {
+  border-left: 2px solid var(--border-subtle);
+  padding-left: 14px;
+}
+
+:global([data-theme="obsidian"]) .expItem {
+  border-left-color: rgba(167, 139, 250, 0.35);
+}
+
+.expHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.expRole {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.expDate {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.expCompany {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.expDesc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ─── EDUCATION ──────────────────────────────────────────────────────────────── */
+
+.eduList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.eduItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.eduDegree {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.eduInst {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.eduYear {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ─── EMPTY / NO-RESUME ──────────────────────────────────────────────────────── */
+
+.emptyNote {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.noResume {
+  padding: 40px 28px;
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.noResumeText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .leftCol {
+    order: 1;
+  }
+
+  .rightCol {
+    order: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 24px 20px;
+  }
+}

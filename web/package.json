@@ -16,6 +16,7 @@
     "react-globe.gl": "^2.38.0",
     "react-router-dom": "^6.20.0",
     "react-vanilla-tilt": "^1.0.0",
+    "recharts": "^3.8.1",
     "three": "^0.184.0",
     "vanilla-tilt": "^1.8.1",
     "vanta": "^0.5.24"

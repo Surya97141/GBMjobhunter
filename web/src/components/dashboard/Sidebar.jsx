@@ -1,11 +1,13 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import styles from './Sidebar.module.css';
 
 const NAV_ITEMS = [
   { to: '/dashboard',               label: 'Dashboard',     end: true  },
   { to: '/dashboard/applications',  label: 'Applications',  end: false },
   { to: '/dashboard/insights',      label: 'Insights',      end: false },
+  { to: '/dashboard/profile',       label: 'Profile',       end: false },
   { to: '/dashboard/opportunities', label: 'Opportunities', end: false },
 ];
 
@@ -41,10 +43,17 @@ function SunIcon() {
 
 export default function Sidebar() {
   const { theme, setTheme } = useTheme();
-  const isDark = theme === 'obsidian';
+  const { user, logout }    = useAuth();
+  const navigate            = useNavigate();
+  const isDark              = theme === 'obsidian';
 
   function handleToggle() {
     setTheme(isDark ? 'cream' : 'obsidian');
+  }
+
+  function handleLogout() {
+    logout();
+    navigate('/');
   }
 
   return (
@@ -79,10 +88,9 @@ export default function Sidebar() {
         <span>{isDark ? 'Light mode' : 'Dark mode'}</span>
       </button>
 
-      {/* Hardcoded for now — wired to auth context in Phase 10 */}
       <div className={styles.userInfo}>
-        <span className={styles.userName}>Alex Johnson</span>
-        <span className={styles.userEmail}>alex@example.com</span>
+        <span className={styles.userEmail}>{user?.email ?? '—'}</span>
+        <button className={styles.logoutBtn} onClick={handleLogout}>Sign out</button>
       </div>
 
     </aside>

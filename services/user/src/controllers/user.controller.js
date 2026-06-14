@@ -1,31 +1,11 @@
-const { z } = require('zod');
+const pdfParse  = require('pdf-parse');
+const { z }     = require('zod');
 const userService = require('../services/user.service');
+const { parseResumeText, resumeQualityScore } = require('../utils/resumeParser');
 const { sendError, sendSuccess } = require('../utils/errors');
 
 const updateProfileSchema = z.object({
   email: z.string().email(),
-});
-
-const resumeSchema = z.object({
-  personalInfo: z.object({
-    name: z.string().min(1),
-    phone: z.string().optional(),
-    location: z.string().optional(),
-    linkedin: z.string().url().optional(),
-  }),
-  skills: z.array(z.string()),
-  workExperience: z.array(z.object({
-    company: z.string(),
-    role: z.string(),
-    startDate: z.string(),
-    endDate: z.string().optional(),
-    description: z.string().optional(),
-  })),
-  education: z.array(z.object({
-    institution: z.string(),
-    degree: z.string(),
-    year: z.number().optional(),
-  })).optional(),
 });
 
 async function getMe(req, res) {
@@ -52,14 +32,34 @@ async function updateMe(req, res) {
 }
 
 async function uploadResume(req, res) {
-  const result = resumeSchema.safeParse(req.body);
-  if (!result.success) {
-    return sendError(res, 400, 'Validation failed', result.error.errors);
+  // multer runs before this — req.file is the PDF buffer
+  if (!req.file) {
+    return sendError(res, 400, 'No PDF file uploaded. Send a multipart/form-data request with field name "resume".');
   }
 
   try {
-    const user = await userService.saveResume(req.user.sub, result.data);
-    return sendSuccess(res, 200, { user });
+    // Extract raw text from the PDF buffer
+    const pdf     = await pdfParse(req.file.buffer);
+    const rawText = pdf.text;
+
+    if (!rawText || rawText.trim().length < 50) {
+      return sendError(res, 422, 'Could not extract text from PDF. Ensure the file is not a scanned image.');
+    }
+
+    // Parse raw text into structured resume JSON
+    const parsed = parseResumeText(rawText);
+
+    // Compute a quality/completeness score for ats_score_cache
+    const qualityScore = resumeQualityScore(parsed);
+
+    // Save resume JSON and update ATS cache
+    const user = await userService.saveResumeAndScore(req.user.sub, parsed, qualityScore);
+
+    return sendSuccess(res, 200, {
+      user,
+      resume: parsed,
+      ats_score: qualityScore,
+    });
   } catch (err) {
     return sendError(res, err.statusCode || 500, err.message);
   }
@@ -74,4 +74,22 @@ async function getResume(req, res) {
   }
 }
 
-module.exports = { getMe, updateMe, uploadResume, getResume };
+async function getInsights(req, res) {
+  try {
+    const insights = await userService.getInsights(req.user.sub);
+    return sendSuccess(res, 200, { insights });
+  } catch (err) {
+    return sendError(res, err.statusCode || 500, err.message);
+  }
+}
+
+async function markInsightSeen(req, res) {
+  try {
+    const insight = await userService.markInsightSeen(req.params.id, req.user.sub);
+    return sendSuccess(res, 200, { insight });
+  } catch (err) {
+    return sendError(res, err.statusCode || 500, err.message);
+  }
+}
+
+module.exports = { getMe, updateMe, uploadResume, getResume, getInsights, markInsightSeen };

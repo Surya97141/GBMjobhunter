@@ -18,11 +18,6 @@
   margin-top: 8px;
 }
 
-/* ─── SECTION HEADER ───────────────────────────────────────────────────────── */
-
-.sectionHeader {
-  margin-bottom: 20px;
-}
 
 /* ─── CARD GRID ────────────────────────────────────────────────────────────── */
 
@@ -98,7 +93,7 @@
   color: var(--text-muted);
 }
 
-/* Confidence dot pushed to the far right via margin-left: auto */
+/* Dot pushed to the far right via margin-left: auto */
 .dot {
   width: 6px;
   height: 6px;
@@ -107,9 +102,9 @@
   margin-left: auto;
 }
 
-.dot[data-confidence="high"] { background: var(--color-high); }
-.dot[data-confidence="mid"]  { background: var(--color-mid);  }
-.dot[data-confidence="low"]  { background: var(--color-low);  }
+.dot[data-level="high"] { background: var(--color-high); }
+.dot[data-level="mid"]  { background: var(--color-mid);  }
+.dot[data-level="low"]  { background: var(--color-low);  }
 
 .headline {
   font-family: var(--font-body);
@@ -125,6 +120,81 @@
   font-size: 12px;
   line-height: 1.65;
   color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+/* ─── CARD FOOTER ──────────────────────────────────────────────────────────── */
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cohort {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.seenBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.seenBtn:hover { opacity: 0.7; }
+
+/* Seen cards are slightly dimmed */
+.cardSeen { opacity: 0.6; }
+
+/* ─── SECTION HEADER LINK ──────────────────────────────────────────────────── */
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.viewAll {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.viewAll:hover { text-decoration: underline; }
+
+/* ─── EMPTY STATE ──────────────────────────────────────────────────────────── */
+
+.emptyState {
+  padding: 32px 24px;
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: 12px;
+}
+
+.emptyHeadline {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.emptyBody {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
   margin: 0;
 }
 

@@ -1,88 +1,97 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DragDropContext } from '@hello-pangea/dnd';
+import client from '../api/client';
 import KanbanColumn from '../components/kanban/KanbanColumn';
 import { Display, Body } from '../components/Typography';
 import styles from './KanbanPage.module.css';
 
-// ─── INITIAL BOARD STATE ──────────────────────────────────────────────────────
+// Column definitions — id matches the outcome value stored in the database.
+const COLUMNS = [
+  { id: 'pending',   title: 'Applied'   },
+  { id: 'interview', title: 'Interview' },
+  { id: 'offer',     title: 'Offer'     },
+  { id: 'rejected',  title: 'Rejected'  },
+  { id: 'ghosted',   title: 'Ghosted'   },
+];
 
-const INITIAL_CARDS = {
-  'app-1': { id: 'app-1', company: 'Stripe',   role: 'Senior Frontend Engineer',       atsScore: 87, date: 'Mar 18' },
-  'app-2': { id: 'app-2', company: 'Linear',   role: 'Product Engineer',               atsScore: 91, date: 'Mar 15' },
-  'app-3': { id: 'app-3', company: 'Vercel',   role: 'Developer Experience Engineer',  atsScore: 74, date: 'Mar 12' },
-  'app-4': { id: 'app-4', company: 'Figma',    role: 'Senior Software Engineer',       atsScore: 82, date: 'Mar 9'  },
-  'app-5': { id: 'app-5', company: 'Notion',   role: 'Full Stack Engineer',            atsScore: 79, date: 'Mar 7'  },
-  'app-6': { id: 'app-6', company: 'Loom',     role: 'Frontend Engineer',              atsScore: 88, date: 'Mar 5'  },
-  'app-7': { id: 'app-7', company: 'Fly.io',   role: 'Platform Engineer',              atsScore: 77, date: 'Mar 3'  },
-};
-
-const INITIAL_COLUMNS = {
-  applied: {
-    id: 'applied',
-    title: 'Applied',
-    cardIds: ['app-2', 'app-5', 'app-7'],
-  },
-  interviewing: {
-    id: 'interviewing',
-    title: 'Interviewing',
-    cardIds: ['app-1', 'app-6'],
-  },
-  offer: {
-    id: 'offer',
-    title: 'Offer',
-    cardIds: [],
-  },
-  rejected: {
-    id: 'rejected',
-    title: 'Rejected',
-    cardIds: ['app-3', 'app-4'],
-  },
-};
-
-const COLUMN_ORDER = ['applied', 'interviewing', 'offer', 'rejected'];
-
-// ─── COMPONENT ────────────────────────────────────────────────────────────────
+// Group a flat applications array into { [outcome]: app[] }.
+function groupByOutcome(apps) {
+  const map = {};
+  COLUMNS.forEach(col => { map[col.id] = []; });
+  apps.forEach(app => {
+    const key = map[app.outcome] !== undefined ? app.outcome : 'pending';
+    map[key].push(app);
+  });
+  return map;
+}
 
 export default function KanbanPage() {
-  const [columns, setColumns] = useState(INITIAL_COLUMNS);
+  const [cards, setCards]     = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
 
-  function handleDragEnd({ draggableId, source, destination }) {
-    // Dropped outside a column
+  useEffect(() => {
+    client.get('/applications')
+      .then(res => setCards(groupByOutcome(res.data.data.applications)))
+      .catch(() => setError('Could not load applications.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function onDragEnd(result) {
+    const { source, destination, draggableId } = result;
+
     if (!destination) return;
+    if (destination.droppableId === source.droppableId &&
+        destination.index       === source.index) return;
 
-    // Dropped in the same position
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) return;
+    const srcCol  = source.droppableId;
+    const destCol = destination.droppableId;
 
-    const sourceCol = columns[source.droppableId];
-    const destCol   = columns[destination.droppableId];
+    // Optimistic update — move card in local state immediately.
+    const srcCards  = Array.from(cards[srcCol]);
+    const destCards = srcCol === destCol ? srcCards : Array.from(cards[destCol]);
+    const [moved]   = srcCards.splice(source.index, 1);
+    destCards.splice(destination.index, 0, { ...moved, outcome: destCol });
 
-    if (sourceCol.id === destCol.id) {
-      // Reorder within the same column
-      const newIds = Array.from(sourceCol.cardIds);
-      newIds.splice(source.index, 1);
-      newIds.splice(destination.index, 0, draggableId);
+    setCards(prev => ({
+      ...prev,
+      [srcCol]:  srcCards,
+      [destCol]: destCards,
+    }));
 
-      setColumns(prev => ({
-        ...prev,
-        [sourceCol.id]: { ...sourceCol, cardIds: newIds },
-      }));
-    } else {
-      // Move between columns
-      const sourceIds = Array.from(sourceCol.cardIds);
-      sourceIds.splice(source.index, 1);
-
-      const destIds = Array.from(destCol.cardIds);
-      destIds.splice(destination.index, 0, draggableId);
-
-      setColumns(prev => ({
-        ...prev,
-        [sourceCol.id]: { ...sourceCol, cardIds: sourceIds },
-        [destCol.id]:   { ...destCol,   cardIds: destIds  },
-      }));
+    // Persist to backend.
+    try {
+      await client.put(`/applications/${draggableId}/outcome`, { outcome: destCol });
+    } catch {
+      // Revert if API call fails.
+      setCards(prev => {
+        const revertSrc  = Array.from(prev[srcCol]);
+        const revertDest = srcCol === destCol ? revertSrc : Array.from(prev[destCol]);
+        revertDest.splice(destination.index, 1);
+        revertSrc.splice(source.index, 0, moved);
+        return { ...prev, [srcCol]: revertSrc, [destCol]: revertDest };
+      });
     }
+  }
+
+  if (loading) {
+    return (
+      <main className={styles.content}>
+        <div className={styles.state}>
+          <Body color="secondary">Loading applications…</Body>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className={styles.content}>
+        <div className={styles.state}>
+          <Body color="secondary">{error}</Body>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -93,15 +102,15 @@ export default function KanbanPage() {
         <Body color="secondary">Drag cards to update their stage.</Body>
       </header>
 
-      <DragDropContext onDragEnd={handleDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd}>
         <div className={styles.board} role="list" aria-label="Application kanban board">
-          {COLUMN_ORDER.map((colId) => {
-            const column = columns[colId];
-            const cards  = column.cardIds.map(id => INITIAL_CARDS[id]);
-            return (
-              <KanbanColumn key={colId} column={column} cards={cards} />
-            );
-          })}
+          {COLUMNS.map(col => (
+            <KanbanColumn
+              key={col.id}
+              column={col}
+              cards={cards[col.id] ?? []}
+            />
+          ))}
         </div>
       </DragDropContext>
 

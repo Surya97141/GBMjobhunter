@@ -1,4 +1,5 @@
-const usersDb = require('../db/users.db');
+const usersDb    = require('../db/users.db');
+const insightsDb = require('../db/insights.db');
 
 async function getProfile(userId) {
   const user = await usersDb.findUserById(userId);
@@ -30,6 +31,17 @@ async function saveResume(userId, resumeJson) {
   return user;
 }
 
+async function saveResumeAndScore(userId, resumeJson, qualityScore) {
+  const user = await usersDb.saveResume(userId, resumeJson);
+  if (!user) {
+    const err = new Error('User not found');
+    err.statusCode = 404;
+    throw err;
+  }
+  await usersDb.updateAtsCache(userId, qualityScore);
+  return { ...user, ats_score_cache: qualityScore };
+}
+
 async function getResume(userId) {
   const resume = await usersDb.getResume(userId);
   if (!resume) {
@@ -40,4 +52,18 @@ async function getResume(userId) {
   return resume;
 }
 
-module.exports = { getProfile, updateProfile, saveResume, getResume };
+async function getInsights(userId) {
+  return insightsDb.getInsightsByUserId(userId);
+}
+
+async function markInsightSeen(insightId, userId) {
+  const insight = await insightsDb.markInsightSeen(insightId, userId);
+  if (!insight) {
+    const err = new Error('Insight not found');
+    err.statusCode = 404;
+    throw err;
+  }
+  return insight;
+}
+
+module.exports = { getProfile, updateProfile, saveResume, saveResumeAndScore, getResume, getInsights, markInsightSeen };

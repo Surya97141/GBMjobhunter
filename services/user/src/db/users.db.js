@@ -52,6 +52,15 @@ async function getResume(id) {
   return rows[0]?.resume_json || null;
 }
 
+async function updateAtsCache(id, score) {
+  const { rows } = await pool.query(
+    `UPDATE users SET ats_score_cache = $1 WHERE id = $2
+     RETURNING id, email, ats_score_cache, created_at`,
+    [score, id]
+  );
+  return rows[0] || null;
+}
+
 module.exports = {
   findUserByEmail,
   findUserById,
@@ -59,4 +68,5 @@ module.exports = {
   updateUserProfile,
   saveResume,
   getResume,
+  updateAtsCache,
 };

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const p = require\\('pdf-parse'\\); console.log\\(p.constructor.name, Object.keys\\(p\\)\\)\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('name'\\), d.get\\('version'\\), d.get\\('main'\\)\\)\")",
+      "PowerShell(node -e \"const { PDFParse } = require\\('pdf-parse'\\); const p = new PDFParse\\(\\); console.log\\(Object.getOwnPropertyNames\\(Object.getPrototypeOf\\(p\\)\\)\\)\")"
+    ]
+  }
+}

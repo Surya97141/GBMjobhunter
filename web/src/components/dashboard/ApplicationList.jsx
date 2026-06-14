@@ -1,17 +1,39 @@
 import { Heading } from '../Typography';
 import styles from './ApplicationList.module.css';
 
-// Hardcoded mock data — replaced by API call in Phase 10
-const MOCK_APPLICATIONS = [
-  { id: 1, company: 'Stripe',  role: 'Senior Frontend Engineer',        status: 'interview', appliedAt: 'Mar 18', atsScore: 87 },
-  { id: 2, company: 'Linear',  role: 'Product Engineer',                status: 'pending',   appliedAt: 'Mar 15', atsScore: 91 },
-  { id: 3, company: 'Vercel',  role: 'Developer Experience Engineer',   status: 'ghosted',   appliedAt: 'Mar 12', atsScore: 74 },
-  { id: 4, company: 'Figma',   role: 'Senior Software Engineer',        status: 'rejected',  appliedAt: 'Mar 9',  atsScore: 82 },
-  { id: 5, company: 'Notion',  role: 'Full Stack Engineer',             status: 'pending',   appliedAt: 'Mar 7',  atsScore: 79 },
-  { id: 6, company: 'Loom',    role: 'Frontend Engineer',               status: 'interview', appliedAt: 'Mar 5',  atsScore: 88 },
-];
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
-export default function ApplicationList() {
+export default function ApplicationList({ applications = [], loading = false }) {
+  if (loading) {
+    return (
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <Heading as="h2">Recent Applications</Heading>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, padding: '16px 0' }}>
+          Loading…
+        </p>
+      </section>
+    );
+  }
+
+  if (applications.length === 0) {
+    return (
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <Heading as="h2">Recent Applications</Heading>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, padding: '16px 0' }}>
+          No applications yet. Use the browser extension on a job page to log your first one.
+        </p>
+      </section>
+    );
+  }
+
+  const recent = applications.slice(0, 6);
+
   return (
     <section className={styles.section}>
 
@@ -31,24 +53,28 @@ export default function ApplicationList() {
           </tr>
         </thead>
         <tbody className={styles.tbody}>
-          {MOCK_APPLICATIONS.map((app) => (
+          {recent.map(app => (
             <tr key={app.id}>
               <td>
                 <div className={styles.companyCell}>
                   <div className={styles.avatar} aria-hidden="true">
-                    {app.company[0]}
+                    {app.company_name?.[0] ?? '?'}
                   </div>
-                  <span className={styles.companyName}>{app.company}</span>
+                  <span className={styles.companyName}>{app.company_name}</span>
                 </div>
               </td>
-              <td><span className={styles.role}>{app.role}</span></td>
-              <td><span className={styles.atsScore}>{app.atsScore}</span></td>
+              <td><span className={styles.role}>{app.role_title}</span></td>
               <td>
-                <span className={styles.statusBadge} data-status={app.status}>
-                  {app.status}
+                <span className={styles.atsScore}>
+                  {app.ats_score_at_apply !== null ? app.ats_score_at_apply : '—'}
                 </span>
               </td>
-              <td><span className={styles.date}>{app.appliedAt}</span></td>
+              <td>
+                <span className={styles.statusBadge} data-status={app.outcome}>
+                  {app.outcome}
+                </span>
+              </td>
+              <td><span className={styles.date}>{formatDate(app.applied_at)}</span></td>
             </tr>
           ))}
         </tbody>
