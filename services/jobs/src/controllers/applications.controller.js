@@ -31,9 +31,32 @@ async function logApplication(req, res) {
 
 async function getApplications(req, res) {
   try {
-    const userId      = req.headers['x-user-id'];
-    const applications = await applicationsService.getUserApplications(userId);
+    const userId = req.headers['x-user-id'];
+
+    // Cap limit between 1 and 100; default to no limit (null = return all)
+    const limit = req.query.limit
+      ? Math.min(Math.max(parseInt(req.query.limit, 10), 1), 100)
+      : null;
+
+    const offset = req.query.offset
+      ? Math.max(parseInt(req.query.offset, 10), 0)
+      : 0;
+
+    const applications = await applicationsService.getUserApplications(userId, limit, offset);
     return sendSuccess(res, 200, { applications });
+  } catch (err) {
+    return sendError(res, err.statusCode || 500, err.message);
+  }
+}
+
+async function getApplicationStats(req, res) {
+  try {
+    const userId = req.headers['x-user-id'];
+    if (!userId) {
+      return sendError(res, 401, 'Unauthorised');
+    }
+    const stats = await applicationsService.getApplicationStats(userId);
+    return sendSuccess(res, 200, { stats });
   } catch (err) {
     return sendError(res, err.statusCode || 500, err.message);
   }
@@ -60,4 +83,4 @@ async function updateOutcome(req, res) {
   }
 }
 
-module.exports = { logApplication, getApplications, updateOutcome };
+module.exports = { logApplication, getApplications, getApplicationStats, updateOutcome };

@@ -1,12 +1,7 @@
 const pdfParse  = require('pdf-parse');
-const { z }     = require('zod');
 const userService = require('../services/user.service');
 const { parseResumeText, resumeQualityScore } = require('../utils/resumeParser');
 const { sendError, sendSuccess } = require('../utils/errors');
-
-const updateProfileSchema = z.object({
-  email: z.string().email(),
-});
 
 async function getMe(req, res) {
   try {
@@ -18,13 +13,24 @@ async function getMe(req, res) {
 }
 
 async function updateMe(req, res) {
-  const result = updateProfileSchema.safeParse(req.body);
-  if (!result.success) {
-    return sendError(res, 400, 'Validation failed', result.error.errors);
-  }
-
   try {
-    const user = await userService.updateProfile(req.user.sub, result.data);
+    const { name, email, target_role, target_location, years_of_experience } = req.body;
+
+    const fields = {};
+    if (name               !== undefined) fields.name               = name;
+    if (email              !== undefined) fields.email              = email;
+    if (target_role        !== undefined) fields.target_role        = target_role;
+    if (target_location    !== undefined) fields.target_location    = target_location;
+    if (years_of_experience !== undefined) {
+      const parsed = parseInt(years_of_experience, 10);
+      if (!Number.isNaN(parsed)) fields.years_of_experience = parsed;
+    }
+
+    if (Object.keys(fields).length === 0) {
+      return sendError(res, 400, 'No valid fields to update');
+    }
+
+    const user = await userService.updateProfile(req.user.sub, fields);
     return sendSuccess(res, 200, { user });
   } catch (err) {
     return sendError(res, err.statusCode || 500, err.message);
@@ -32,13 +38,11 @@ async function updateMe(req, res) {
 }
 
 async function uploadResume(req, res) {
-  // multer runs before this — req.file is the PDF buffer
   if (!req.file) {
     return sendError(res, 400, 'No PDF file uploaded. Send a multipart/form-data request with field name "resume".');
   }
 
   try {
-    // Extract raw text from the PDF buffer
     const pdf     = await pdfParse(req.file.buffer);
     const rawText = pdf.text;
 
@@ -46,18 +50,13 @@ async function uploadResume(req, res) {
       return sendError(res, 422, 'Could not extract text from PDF. Ensure the file is not a scanned image.');
     }
 
-    // Parse raw text into structured resume JSON
-    const parsed = parseResumeText(rawText);
-
-    // Compute a quality/completeness score for ats_score_cache
+    const parsed       = parseResumeText(rawText);
     const qualityScore = resumeQualityScore(parsed);
-
-    // Save resume JSON and update ATS cache
-    const user = await userService.saveResumeAndScore(req.user.sub, parsed, qualityScore);
+    const user         = await userService.saveResumeAndScore(req.user.sub, parsed, qualityScore);
 
     return sendSuccess(res, 200, {
       user,
-      resume: parsed,
+      resume:    parsed,
       ats_score: qualityScore,
     });
   } catch (err) {

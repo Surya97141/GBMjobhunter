@@ -10,7 +10,12 @@ async function findUserByEmail(email) {
 
 async function findUserById(id) {
   const { rows } = await pool.query(
-    'SELECT id, email, ats_score_cache, created_at FROM users WHERE id = $1',
+    `SELECT
+       id, email, name, ats_score_cache,
+       target_role, target_location,
+       years_of_experience, created_at
+     FROM users
+     WHERE id = $1`,
     [id]
   );
   return rows[0] || null;
@@ -26,11 +31,41 @@ async function createUser({ id, email, hashedPassword }) {
   return rows[0];
 }
 
-async function updateUserProfile(id, { email }) {
+// Dynamically patches only the fields that are passed in.
+// Allowed keys are whitelisted to prevent injection via field name.
+// Dollar-sign placeholders are built from the allowed list — never from user input.
+async function updateUserProfile(userId, fields) {
+  const ALLOWED = [
+    'name', 'email',
+    'target_role', 'target_location',
+    'years_of_experience',
+  ];
+
+  const updates = [];
+  const values  = [];
+  let i = 1;
+
+  for (const key of ALLOWED) {
+    if (fields[key] !== undefined) {
+      updates.push(`${key} = $${i}`);
+      values.push(fields[key]);
+      i++;
+    }
+  }
+
+  if (updates.length === 0) return null;
+
+  values.push(userId);
+
   const { rows } = await pool.query(
-    `UPDATE users SET email = $1 WHERE id = $2
-     RETURNING id, email, ats_score_cache, created_at`,
-    [email, id]
+    `UPDATE users
+     SET ${updates.join(', ')}
+     WHERE id = $${i}
+     RETURNING
+       id, email, name, ats_score_cache,
+       target_role, target_location,
+       years_of_experience, created_at`,
+    values
   );
   return rows[0] || null;
 }

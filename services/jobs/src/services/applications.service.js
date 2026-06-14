@@ -36,8 +36,12 @@ async function logApplication(userId, { companyName, roleTitle, jdText, pageUrl 
   return { application, atsScore, seniority };
 }
 
-async function getUserApplications(userId) {
-  return applicationsDb.getApplicationsByUserId(userId);
+async function getUserApplications(userId, limit = null, offset = 0) {
+  return applicationsDb.getApplicationsByUserId(userId, limit, offset);
+}
+
+async function getApplicationStats(userId) {
+  return applicationsDb.getApplicationStats(userId);
 }
 
 async function updateOutcome(applicationId, userId, outcome, responseDays) {
@@ -64,4 +68,4 @@ async function updateOutcome(applicationId, userId, outcome, responseDays) {
   return application;
 }
 
-module.exports = { logApplication, getUserApplications, updateOutcome };
+module.exports = { logApplication, getUserApplications, getApplicationStats, updateOutcome };
