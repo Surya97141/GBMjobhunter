@@ -28,10 +28,24 @@ export function AuthProvider({ children }) {
     setUser(newUser);
   }
 
+  // If the GBM extension is installed it injects a content script into this
+  // page.  Posting GBM_SET_TOKEN lets that script relay the JWT to the
+  // extension's background worker, which stores it in chrome.storage.local.
+  // Safe to call unconditionally — window.postMessage is a no-op if nothing
+  // is listening.
+  function notifyExtension(token) {
+    try {
+      window.postMessage({ type: 'GBM_SET_TOKEN', token }, window.location.origin);
+    } catch {
+      // Extension not installed or postMessage blocked — ignore.
+    }
+  }
+
   async function login(email, password) {
     const res = await client.post('/auth/login', { email, password });
     const { user: u, token: t } = res.data.data;
     _save(t, u);
+    notifyExtension(t);
     return u;
   }
 
@@ -39,6 +53,7 @@ export function AuthProvider({ children }) {
     const res = await client.post('/auth/register', { email, password });
     const { user: u, token: t } = res.data.data;
     _save(t, u);
+    notifyExtension(t);
     return u;
   }
 

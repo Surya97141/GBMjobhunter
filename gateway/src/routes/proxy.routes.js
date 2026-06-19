@@ -97,4 +97,9 @@ router.use('/jobs',         requireAuth, standardLimiter, forward(process.env.JO
 // ── Protected opportunity routes ──────────────────────────────────────────────
 router.use('/opportunities', requireAuth, standardLimiter, forward(process.env.OPPORTUNITY_SERVICE_URL));
 
+// ── Protected agent routes ────────────────────────────────────────────────────
+// Standard rate limit (100 req/min) covers total throughput.
+// Per-user Tier 3 quota (5 calls/day) is enforced inside the agent service itself.
+router.use('/agent', requireAuth, standardLimiter, forward(process.env.AGENT_SERVICE_URL));
+
 module.exports = router;

@@ -70,7 +70,7 @@ export default function InsightCards() {
       <div className={styles.sectionHeader}>
         <Heading as="h2">Your Insights</Heading>
         {insights.length > 0 && (
-          <Link to="/insights" className={styles.viewAll}>View all →</Link>
+          <Link to="/dashboard/insights" className={styles.viewAll}>View all →</Link>
         )}
       </div>
 

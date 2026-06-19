@@ -21,11 +21,11 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const { data } = await client.post('/users/login', {
+      const res = await client.post('/auth/login', {
         email:    trimmedEmail,
         password,
       });
-      await signIn(data.token);
+      await signIn(res.data.data.token);
       // Navigation happens automatically — AuthContext token change triggers
       // RootNavigator to swap to the app stack.
     } catch (err) {

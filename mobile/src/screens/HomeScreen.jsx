@@ -39,7 +39,7 @@ export default function HomeScreen({ navigation }) {
     try {
       const [meRes, appsRes] = await Promise.all([
         client.get('/users/me'),
-        client.get('/jobs/applications?limit=10'),
+        client.get('/applications?limit=10'),
       ]);
       setUser(meRes.data.user ?? meRes.data);
       setApplications(appsRes.data.applications ?? appsRes.data ?? []);

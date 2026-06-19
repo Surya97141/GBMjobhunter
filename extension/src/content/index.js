@@ -193,6 +193,33 @@ function classifyFormFields(form) {
     .filter(f => f.type !== FIELD.UNKNOWN);
 }
 
+// ─── JOB DESCRIPTION TEXT EXTRACTION ─────────────────────────────────────────
+
+// Returns the visible text of the job description section (capped at 5 000 chars
+// to keep the POST /applications/score payload small).  Tries common selectors
+// used by major job boards before falling back to the full body text.
+function extractJobText() {
+  const SELECTORS = [
+    '[class*="job-description"]',
+    '[class*="jobDescription"]',
+    '[class*="job_description"]',
+    '[id*="job-description"]',
+    '[data-test*="job-description"]',
+    '[class*="description--"]',
+    'article',
+    'main',
+  ];
+
+  for (const sel of SELECTORS) {
+    const el = document.querySelector(sel);
+    if (el && el.innerText && el.innerText.trim().length > 100) {
+      return el.innerText.slice(0, 5000);
+    }
+  }
+
+  return document.body.innerText.slice(0, 5000);
+}
+
 // ─── JOB METADATA EXTRACTION ──────────────────────────────────────────────────
 
 function extractJobMeta() {
@@ -335,6 +362,7 @@ function refreshPageState() {
     isJobPage: true,
     company:   currentMeta.company,
     role:      currentMeta.role,
+    jdText:    extractJobText(),
     fields:    currentFields.map(f => ({ type: f.type, label: f.label })),
   };
 }
@@ -356,6 +384,21 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
     default:
       break;
+  }
+});
+
+// ─── TOKEN HANDOFF RELAY ──────────────────────────────────────────────────────
+
+// When the content script is injected into the web app (localhost:5173), the web
+// app calls window.postMessage({ type: 'GBM_SET_TOKEN', token }) after login.
+// This listener catches that message and forwards it to the background service
+// worker, which stores it in chrome.storage.local.
+// On production job-board pages this listener is a no-op — messages of type
+// 'GBM_SET_TOKEN' will never originate there.
+window.addEventListener('message', (event) => {
+  if (event.source !== window) return;
+  if (event.data?.type === 'GBM_SET_TOKEN' && event.data?.token) {
+    chrome.runtime.sendMessage({ type: 'GBM_SET_TOKEN', token: event.data.token });
   }
 });
 

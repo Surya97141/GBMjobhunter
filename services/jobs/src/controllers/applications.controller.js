@@ -1,11 +1,13 @@
 const { z } = require('zod');
 const applicationsService = require('../services/applications.service');
+const usersDb             = require('../db/users.db');
+const { scoreResumeAgainstJD } = require('../utils/tfidf');
 const { sendError, sendSuccess } = require('../utils/errors');
 
 const logApplicationSchema = z.object({
   companyName: z.string().min(1),
   roleTitle:   z.string().min(1),
-  jdText:      z.string().min(10),
+  jdText:      z.string().optional().default(''),
   pageUrl:     z.string().url().optional(),
 });
 
@@ -83,4 +85,22 @@ async function updateOutcome(req, res) {
   }
 }
 
-module.exports = { logApplication, getApplications, getApplicationStats, updateOutcome };
+async function scoreJD(req, res) {
+  const { jdText } = req.body;
+  if (!jdText || typeof jdText !== 'string' || jdText.trim().length < 10) {
+    return sendError(res, 400, 'jdText is required (minimum 10 characters)');
+  }
+  try {
+    const userId     = req.headers['x-user-id'];
+    const resumeJson = await usersDb.getResumeByUserId(userId);
+    if (!resumeJson) {
+      return sendSuccess(res, 200, { score: null, reason: 'no_resume' });
+    }
+    const score = scoreResumeAgainstJD(resumeJson, jdText);
+    return sendSuccess(res, 200, { score });
+  } catch (err) {
+    return sendError(res, err.statusCode || 500, err.message);
+  }
+}
+
+module.exports = { logApplication, getApplications, getApplicationStats, updateOutcome, scoreJD };

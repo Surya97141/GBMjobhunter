@@ -31,12 +31,9 @@ export default function LogScreen({ navigation }) {
 
     setLoading(true);
     try {
-      await client.post('/jobs/applications', {
-        company: trimCompany,
-        role:    trimRole,
-        status,
-        notes:   notes.trim() || undefined,
-        date:    new Date().toISOString(),
+      await client.post('/applications', {
+        companyName: trimCompany,
+        roleTitle:   trimRole,
       });
       // Pop back to Home — useFocusEffect there will refresh the list
       navigation.goBack();

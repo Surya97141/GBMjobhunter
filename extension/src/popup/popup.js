@@ -232,7 +232,8 @@ document.getElementById('btn-log').addEventListener('click', () => {
       data: {
         company:  currentJob.company,
         role:     currentJob.role,
-        url:      '', // filled by background from the active tab in Phase 10
+        jdText:   currentJob.jdText ?? '',
+        url:      currentJob.url    ?? '',
         loggedAt: new Date().toISOString(),
       },
     }, (res) => {

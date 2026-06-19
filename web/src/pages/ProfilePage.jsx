@@ -201,12 +201,132 @@ function ScoreHistory({ applications }) {
   );
 }
 
+// ─── Profile edit form ────────────────────────────────────────────────────────
+
+function ProfileEditForm({ initialUser }) {
+  const [form,   setForm]   = useState({
+    name:                initialUser?.name                ?? '',
+    target_role:         initialUser?.target_role         ?? '',
+    target_location:     initialUser?.target_location     ?? '',
+    years_of_experience: initialUser?.years_of_experience ?? '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [saved,  setSaved]  = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  function handleChange(field) {
+    return (e) => {
+      setSaved(false);
+      setSaveError(null);
+      setForm(prev => ({ ...prev, [field]: e.target.value }));
+    };
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    setSaved(false);
+    setSaveError(null);
+    try {
+      const payload = {
+        name:                form.name.trim()               || undefined,
+        target_role:         form.target_role.trim()        || undefined,
+        target_location:     form.target_location.trim()    || undefined,
+        years_of_experience: form.years_of_experience !== ''
+          ? Number(form.years_of_experience)
+          : undefined,
+      };
+      await client.put('/users/me', payload);
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.response?.data?.message || 'Save failed — please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className={styles.card}>
+      <h2 className={styles.cardTitle}>Profile Details</h2>
+      <form className={styles.editForm} onSubmit={handleSave} noValidate>
+
+        <label className={styles.fieldLabel} htmlFor="pf-name">Display Name</label>
+        <input
+          id="pf-name"
+          className={styles.fieldInput}
+          type="text"
+          value={form.name}
+          onChange={handleChange('name')}
+          placeholder="Your full name"
+          autoComplete="name"
+        />
+
+        <label className={styles.fieldLabel} htmlFor="pf-role">Target Role</label>
+        <input
+          id="pf-role"
+          className={styles.fieldInput}
+          type="text"
+          value={form.target_role}
+          onChange={handleChange('target_role')}
+          placeholder="e.g. Senior Frontend Engineer"
+        />
+
+        <label className={styles.fieldLabel} htmlFor="pf-location">Target Location</label>
+        <input
+          id="pf-location"
+          className={styles.fieldInput}
+          type="text"
+          value={form.target_location}
+          onChange={handleChange('target_location')}
+          placeholder="e.g. London, Remote"
+        />
+
+        <label className={styles.fieldLabel} htmlFor="pf-exp">Years of Experience</label>
+        <input
+          id="pf-exp"
+          className={styles.fieldInput}
+          type="number"
+          min="0"
+          max="50"
+          step="1"
+          value={form.years_of_experience}
+          onChange={handleChange('years_of_experience')}
+          placeholder="e.g. 3"
+        />
+
+        <div className={styles.formFooter}>
+          <button
+            type="submit"
+            className={styles.saveBtn}
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : 'Save changes'}
+          </button>
+
+          {saved && (
+            <span className={styles.savedMsg} role="status">
+              Saved
+            </span>
+          )}
+          {saveError && (
+            <span className={styles.saveErrMsg} role="alert">
+              {saveError}
+            </span>
+          )}
+        </div>
+
+      </form>
+    </section>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
   const [resume,       setResume]       = useState(null);
   const [atsScore,     setAtsScore]     = useState(0);
   const [applications, setApplications] = useState([]);
+  const [userProfile,  setUserProfile]  = useState(null);
   const [loading,      setLoading]      = useState(true);
 
   useEffect(() => {
@@ -217,7 +337,9 @@ export default function ProfilePage() {
     ]).then(([resumeRes, appsRes, meRes]) => {
       setResume(resumeRes.data?.data?.resume ?? null);
       setApplications(appsRes.data?.data?.applications ?? []);
-      setAtsScore(meRes.data?.data?.user?.ats_score_cache ?? 0);
+      const user = meRes.data?.data?.user ?? null;
+      setAtsScore(user?.ats_score_cache ?? 0);
+      setUserProfile(user);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -275,8 +397,10 @@ export default function ProfilePage() {
 
         </div>
 
-        {/* Right column: extracted resume data */}
+        {/* Right column: profile edit + extracted resume data */}
         <div className={styles.rightCol}>
+
+          <ProfileEditForm initialUser={userProfile} />
 
           {resume ? (
             <>

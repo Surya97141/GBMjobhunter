@@ -4,13 +4,16 @@
   "version": "1.0.0",
   "description": "Auto-fill job applications and track outcomes",
   "permissions": ["activeTab", "storage", "scripting", "tabs"],
-  "host_permissions": ["https://*/*"],
+  "host_permissions": ["https://*/*", "http://localhost/*"],
+  "externally_connectable": {
+    "matches": ["http://localhost:5173/*"]
+  },
   "background": {
     "service_worker": "src/background/index.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://*/*"],
+      "matches": ["https://*/*", "http://localhost:5173/*"],
       "js": ["src/content/index.js"]
     }
   ],
