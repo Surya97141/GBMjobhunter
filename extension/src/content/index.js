@@ -258,6 +258,22 @@ function extractJobMeta() {
   return { role: '', company: '', location: '' };
 }
 
+// ─── JD FINGERPRINT ───────────────────────────────────────────────────────────
+
+// Browser-side equivalent of services/jobs/src/utils/fingerprint.js hashJD().
+// Same normalisation (trim + lowercase) → SHA-256 → first 16 hex chars.
+// Produces byte-identical output — so extension and server agree on the same hash.
+async function hashJD(jdText) {
+  const buf = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(jdText.trim().toLowerCase())
+  );
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+    .slice(0, 16);
+}
+
 // ─── AUTO-FILL ────────────────────────────────────────────────────────────────
 
 // Maps a classified field type to a value from the user's profile
@@ -342,15 +358,19 @@ function watchForSubmission(form, jobMeta) {
 
 // ─── PAGE STATE ───────────────────────────────────────────────────────────────
 
-let currentForm   = null;
-let currentFields = [];
-let currentMeta   = {};
+let currentForm          = null;
+let currentFields        = [];
+let currentMeta          = {};
+let currentJdFingerprint = null; // cached SHA-256 hash, computed once at page detection
+let currentGhostScore    = null; // cached result sent back by the background service worker
 
 function refreshPageState() {
   currentForm = detectApplicationForm();
   if (!currentForm) {
-    currentFields = [];
-    currentMeta   = {};
+    currentFields        = [];
+    currentMeta          = {};
+    currentJdFingerprint = null;
+    currentGhostScore    = null;
     return null;
   }
 
@@ -358,12 +378,32 @@ function refreshPageState() {
   currentMeta   = extractJobMeta();
   watchForSubmission(currentForm, currentMeta);
 
+  const jdText = extractJobText();
+
+  // Compute the fingerprint once on first detection (async, non-blocking).
+  // On subsequent calls (e.g. popup re-opening) currentJdFingerprint is already
+  // populated and this block is skipped.
+  if (jdText && !currentJdFingerprint) {
+    hashJD(jdText).then(hash => {
+      currentJdFingerprint = hash;
+      // Ask the background to fetch the ghost score using its stored JWT.
+      // Fire-and-forget: background responds via GHOST_SCORE_RESULT message.
+      chrome.runtime.sendMessage({
+        type:              'REQUEST_GHOST_SCORE',
+        jdFingerprintHash: hash,
+        companyName:       currentMeta.company || '',
+      });
+    });
+  }
+
   return {
-    isJobPage: true,
-    company:   currentMeta.company,
-    role:      currentMeta.role,
-    jdText:    extractJobText(),
-    fields:    currentFields.map(f => ({ type: f.type, label: f.label })),
+    isJobPage:         true,
+    company:           currentMeta.company,
+    role:              currentMeta.role,
+    jdText,
+    jdFingerprintHash: currentJdFingerprint,  // null on very first call; hash on all subsequent
+    ghostScore:        currentGhostScore,      // null until background responds
+    fields:            currentFields.map(f => ({ type: f.type, label: f.label })),
   };
 }
 
@@ -381,6 +421,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         .then(() => sendResponse({ ok: true }))
         .catch(err => sendResponse({ ok: false, error: err.message }));
       return true; // async
+
+    case 'GHOST_SCORE_RESULT':
+      // Background fetched the score and sends it back here for caching.
+      // Next GET_PAGE_STATE response will include it.
+      currentGhostScore = message.data;
+      break;
 
     default:
       break;

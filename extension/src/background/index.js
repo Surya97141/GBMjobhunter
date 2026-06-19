@@ -61,7 +61,7 @@ async function fetchAndCacheProfile(token) {
 
 // ─── MAIN MESSAGE ROUTER ──────────────────────────────────────────────────────
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
 
     case 'GET_PAGE_STATE':
@@ -86,6 +86,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           [STORAGE_KEY_PROFILE_TS]: 0,
         });
       }
+      break;
+
+    case 'REQUEST_GHOST_SCORE':
+      // Response goes back via tabs.sendMessage (fire-and-forget from content script).
+      handleRequestGhostScore(message, sender);
       break;
 
     // Content script broadcasts these — background just lets them pass through
@@ -160,6 +165,46 @@ async function handleStartAutofill(sendResponse) {
     sendResponse({ ok: true });
   } catch (err) {
     sendResponse({ ok: false, error: err.message });
+  }
+}
+
+async function handleRequestGhostScore(message, sender) {
+  const tabId = sender?.tab?.id;
+  if (!tabId) return;
+
+  // Always sends a terminal GHOST_SCORE_RESULT back to the content script —
+  // guarantees the popup never stays on "Checking…" indefinitely.
+  function reply(data) {
+    chrome.tabs.sendMessage(tabId, { type: 'GHOST_SCORE_RESULT', data }).catch(() => {});
+  }
+
+  const { auth_token } = await chrome.storage.local
+    .get(STORAGE_KEY_TOKEN).catch(() => ({}));
+
+  if (!auth_token) {
+    reply({ label: 'unavailable', reasons: ['Sign in to see ghost risk'] });
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({ jdFingerprintHash: message.jdFingerprintHash });
+    if (message.companyName) params.set('companyName', message.companyName);
+
+    const res = await fetch(`${API_BASE}/jobs/ghost-score?${params}`, {
+      headers: { Authorization: `Bearer ${auth_token}` },
+    });
+
+    if (!res.ok) {
+      reply({ label: 'unavailable', reasons: ['Ghost score temporarily unavailable'] });
+      return;
+    }
+
+    const body = await res.json().catch(() => null);
+    // body.data shape: { score, label, cohortSize, reasons }
+    // score is forwarded but never displayed — popup reads label + reasons only.
+    reply(body?.data ?? { label: 'unavailable', reasons: ['Unexpected response from server'] });
+  } catch {
+    reply({ label: 'unavailable', reasons: ['Ghost score temporarily unavailable'] });
   }
 }
 
