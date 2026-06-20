@@ -346,3 +346,15 @@
   font-size: 13px;
   color: var(--text-secondary);
 }
+
+/* ─── Skill reason (cohort-sourced recs only) ─────────────────────────────── */
+
+.skillReason {
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-left: 2px solid var(--accent);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0;
+}

@@ -58,8 +58,8 @@ export default function LandingPage() {
             </Body>
 
             <div className={styles.ctaGroup}>
-              <button className={styles.ctaFilled} onClick={() => navigate('/register')}>Get Started</button>
-              <button className={styles.ctaGhost}  onClick={() => navigate('/login')}>Sign In</button>
+              <button type="button" aria-label="Get started — create your account" className={styles.ctaFilled} onClick={() => navigate('/register')}>Get Started</button>
+              <button type="button" aria-label="Sign in to your account"           className={styles.ctaGhost}  onClick={() => navigate('/login')}>Sign In</button>
             </div>
           </div>
 

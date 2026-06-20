@@ -17,7 +17,7 @@ const OpportunitiesPage = lazy(() => import('./pages/OpportunitiesPage'));
 
 function AnimatedRoutes() {
   const location   = useLocation();
-  const topSegment = '/' + location.pathname.split('/')[1];
+  const topSegment = location.pathname;
 
   return (
     <AnimatePresence mode="wait">

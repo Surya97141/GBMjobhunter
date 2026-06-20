@@ -99,7 +99,11 @@
       "PowerShell(node \"d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\diag-hero5.js\")",
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-bug1-fix.js)",
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\diag-kanban.js)",
-      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-bug2-fix.js)"
+      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-bug2-fix.js)",
+      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-win1.js)",
+      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-win2.js)",
+      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-win3.js)",
+      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-part3.js)"
     ]
   }
 }

@@ -150,6 +150,10 @@ function SkillCard({ rec }) {
           ))}
         </ul>
       )}
+
+      {rec.dataSource === "cohort" && rec.reason && (
+        <p className={styles.skillReason}>{rec.reason}</p>
+      )}
     </li>
   );
 }

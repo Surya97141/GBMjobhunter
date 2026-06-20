@@ -105,6 +105,9 @@ export default function KanbanCard({ card, draggableProvided, isDragging }) {
       {...draggableProvided.draggableProps}
       {...draggableProvided.dragHandleProps}
       className={styles.wrapper}
+      role="button"
+      aria-roledescription="draggable card"
+      aria-label={`${card.company_name} — ${card.role_title}`}
     >
       {isDragging ? (
         <div className={`${styles.card} ${styles.dragging}`}>

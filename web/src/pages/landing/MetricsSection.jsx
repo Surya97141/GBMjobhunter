@@ -54,6 +54,7 @@ export default function MetricsSection() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
+        aria-label="Key job search statistics"
       >
         {METRICS.map((m) => (
           <motion.li
