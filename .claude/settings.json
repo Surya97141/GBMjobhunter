@@ -18,7 +18,25 @@
       "PowerShell(cd d:\\\\GBMjobhunter\\\\gateway; Start-Process -FilePath \"node\" -ArgumentList \"index.js\" -WindowStyle Hidden; Start-Sleep -Seconds 3; $conn = Test-NetConnection -ComputerName localhost -Port 3000 -WarningAction SilentlyContinue; \"Gateway port 3000: $\\($conn.TcpTestSucceeded\\)\")",
       "PowerShell($proc = Get-NetTCPConnection -LocalPort 3005 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($proc\\) { Stop-Process -Id $proc.OwningProcess -Force }; cd d:\\\\GBMjobhunter\\\\services\\\\agent; Start-Process -FilePath \"node\" -ArgumentList \"index.js\" -WindowStyle Hidden; Start-Sleep -Seconds 3; $login = Invoke-RestMethod -Uri \"http://localhost:3000/auth/login\" -Method Post -ContentType \"application/json\" -Body '{\"email\":\"smoketest@gbm.local\",\"password\":\"Smoke1234!\"}'; $H = @{ Authorization = \"Bearer $\\($login.data.token\\)\" }; Invoke-RestMethod -Uri \"http://localhost:3000/agent/health\" -Headers $H | ConvertTo-Json -Depth 5)",
       "PowerShell($proc = Get-NetTCPConnection -LocalPort 3005 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($proc\\) { Stop-Process -Id $proc.OwningProcess -Force }; cd d:\\\\GBMjobhunter\\\\services\\\\agent; Start-Process -FilePath \"node\" -ArgumentList \"index.js\" -WindowStyle Hidden; Start-Sleep -Seconds 3; $conn = Test-NetConnection -ComputerName localhost -Port 3005 -WarningAction SilentlyContinue; \"Port 3005: $\\($conn.TcpTestSucceeded\\)\")",
-      "PowerShell($proc = Get-NetTCPConnection -LocalPort 3002 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($proc\\) { Stop-Process -Id $proc.OwningProcess -Force; \"Killed PID $\\($proc.OwningProcess\\)\" }; cd d:\\\\GBMjobhunter\\\\services\\\\jobs; Start-Process -FilePath \"node\" -ArgumentList \"index.js\" -WindowStyle Hidden; Start-Sleep -Seconds 3; $conn = Test-NetConnection -ComputerName localhost -Port 3002 -WarningAction SilentlyContinue; \"Jobs Service port 3002: $\\($conn.TcpTestSucceeded\\)\")"
+      "PowerShell($proc = Get-NetTCPConnection -LocalPort 3002 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($proc\\) { Stop-Process -Id $proc.OwningProcess -Force; \"Killed PID $\\($proc.OwningProcess\\)\" }; cd d:\\\\GBMjobhunter\\\\services\\\\jobs; Start-Process -FilePath \"node\" -ArgumentList \"index.js\" -WindowStyle Hidden; Start-Sleep -Seconds 3; $conn = Test-NetConnection -ComputerName localhost -Port 3002 -WarningAction SilentlyContinue; \"Jobs Service port 3002: $\\($conn.TcpTestSucceeded\\)\")",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue | Select-Object Id, CPU, @{N='Cmd';E={$_.MainWindowTitle}} | Format-Table -AutoSize)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 3000,3001,3002,5433,6380 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(netstat -ano)",
+      "PowerShell(Start-Process -NoNewWindow -FilePath \"node\" -ArgumentList \"index.js\" -WorkingDirectory \"d:\\\\GBMjobhunter\\\\services\\\\jobs\" -RedirectStandardOutput \"d:\\\\GBMjobhunter\\\\logs\\\\jobs.log\" -RedirectStandardError \"d:\\\\GBMjobhunter\\\\logs\\\\jobs-err.log\")",
+      "PowerShell(Start-Process -NoNewWindow -FilePath \"node\" -ArgumentList \"index.js\" -WorkingDirectory \"d:\\\\GBMjobhunter\\\\services\\\\user\" -RedirectStandardOutput \"d:\\\\GBMjobhunter\\\\logs\\\\user.log\" -RedirectStandardError \"d:\\\\GBMjobhunter\\\\logs\\\\user-err.log\")",
+      "PowerShell(Start-Process -NoNewWindow -FilePath \"node\" -ArgumentList \"index.js\" -WorkingDirectory \"d:\\\\GBMjobhunter\\\\gateway\" -RedirectStandardOutput \"d:\\\\GBMjobhunter\\\\logs\\\\gateway.log\" -RedirectStandardError \"d:\\\\GBMjobhunter\\\\logs\\\\gateway-err.log\")",
+      "PowerShell(docker exec gbmjobhunter-postgres-1 psql -U gbm -d gbmjobhunter -c \"INSERT INTO companies \\(id, name\\) VALUES \\('00000000-0000-0000-0000-000000000099', 'Ghost Test Corp'\\);\" 2>&1)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(node -e \"require\\('puppeteer'\\)\")",
+      "Bash(node -e \"require\\('puppeteer-core'\\)\")",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "PowerShell(npm install --save-dev playwright @playwright/test 2>&1)",
+      "PowerShell(npx playwright install chromium 2>&1)",
+      "PowerShell(npx playwright install chromium --with-deps 2>&1)",
+      "PowerShell(node -e \"const {chromium}=require\\('playwright'\\); chromium.executablePath\\(\\).then\\(p=>console.log\\('chromium at:',p\\)\\).catch\\(e=>console.log\\('err:',e.message\\)\\)\")",
+      "PowerShell(node -e \"const {chromium}=require\\('playwright'\\); console.log\\('chromium at:', chromium.executablePath\\(\\)\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/test-job-page.html)"
     ]
   }
 }

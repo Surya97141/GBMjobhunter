@@ -69,6 +69,61 @@ function populateJob(job) {
 
   document.getElementById('ats-label').textContent = score > 0 ? scoreLabel(score)  : 'Score pending';
   document.getElementById('ats-sub').textContent   = score > 0 ? scoreMissing(score) : 'Fetching ATS data…';
+
+  populateGhostScore(job.ghostScore ?? null);
+}
+
+function populateGhostScore(ghostScore) {
+  const dot       = document.getElementById('ghost-dot');
+  const labelEl   = document.getElementById('ghost-label-text');
+  const whyBtn    = document.getElementById('ghost-why-btn');
+  const reasonsEl = document.getElementById('ghost-reasons');
+
+  dot.className      = 'ghost-dot'; // reset colour modifier
+  whyBtn.hidden      = true;
+  reasonsEl.hidden   = true;
+  reasonsEl.innerHTML = '';
+
+  if (!ghostScore) {
+    labelEl.textContent = 'Checking…'; // score still in flight
+    return;
+  }
+
+  const { label, reasons } = ghostScore;
+
+  if (label === 'insufficient_data') {
+    labelEl.textContent = 'Not enough data yet';
+    return;
+  }
+
+  if (label === 'unavailable') {
+    // reasons[0] is a human-readable message set by the background handler
+    labelEl.textContent = reasons?.[0] ?? 'Ghost score unavailable';
+    return;
+  }
+
+  const LABELS = {
+    low_risk:      ['low',      'Low risk'],
+    moderate_risk: ['moderate', 'Moderate risk'],
+    high_risk:     ['high',     'High risk'],
+  };
+  const [dotClass, text] = LABELS[label] ?? ['', label];
+
+  dot.classList.add(dotClass);
+  labelEl.textContent = text;
+
+  if (reasons?.length) {
+    reasons.forEach(r => {
+      const li = document.createElement('li');
+      li.textContent = r;
+      reasonsEl.appendChild(li);
+    });
+    whyBtn.hidden = false;
+    whyBtn.onclick = () => {
+      reasonsEl.hidden   = !reasonsEl.hidden;
+      whyBtn.textContent = reasonsEl.hidden ? 'Why?' : 'Hide';
+    };
+  }
 }
 
 function populateFilling(fields) {
