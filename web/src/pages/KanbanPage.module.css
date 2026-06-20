@@ -41,3 +41,13 @@
     padding: 32px;
   }
 }
+
+@media (max-width: 768px) {
+  .content {
+    padding: 24px 16px 64px;
+  }
+
+  .board {
+    box-shadow: inset -48px 0 24px -8px var(--bg-primary);
+  }
+}

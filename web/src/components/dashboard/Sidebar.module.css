@@ -140,3 +140,11 @@
 .logoutBtn:hover {
   color: #f87171;
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: static;
+    height: auto;
+    overflow-y: visible;
+  }
+}
