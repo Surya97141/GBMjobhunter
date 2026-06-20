@@ -65,7 +65,20 @@
       "PowerShell($token = \\(Invoke-RestMethod -Uri \"http://localhost:3000/auth/login\" -Method POST -Body '{\"email\":\"test@example.com\",\"password\":\"password123\"}' -ContentType \"application/json\"\\).data.token; Write-Host \"Token: $\\($token.Substring\\(0,20\\)\\)...\"; $body = '{\"role\":\"Senior Software Engineer\",\"company\":\"Acme Corp\",\"jobDescription\":\"Distributed systems role.\"}'; try { Invoke-RestMethod -Uri \"http://localhost:3000/agent/generate-cover-letter\" -Method POST -ContentType \"application/json\" -Body $body -Headers @{Authorization=\"Bearer $token\"} -TimeoutSec 30 | ConvertTo-Json -Depth 3 } catch { Write-Host \"Exception: $_\"; $_.Exception.Response | ConvertTo-Json })",
       "PowerShell($proc = Get-NetTCPConnection -LocalPort 3005 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($proc\\) { Stop-Process -Id $proc.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Process -FilePath \"node\" -ArgumentList \"--watch\", \"index.js\" -WorkingDirectory \"d:\\\\GBMjobhunter\\\\services\\\\agent\" -WindowStyle Hidden; Start-Sleep -Seconds 4; Invoke-RestMethod -Uri \"http://127.0.0.1:3005/agent/health\" | ConvertTo-Json -Depth 4)",
       "PowerShell(Move-Item -Path \"d:\\\\GBMjobhunter\\\\verify-phase-e-live.js\" -Destination \"d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-phase-e-live.js\")",
-      "PowerShell(Move-Item -Path \"d:\\\\GBMjobhunter\\\\verify-phase-f-live.js\" -Destination \"d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-phase-f-live.js\")"
+      "PowerShell(Move-Item -Path \"d:\\\\GBMjobhunter\\\\verify-phase-f-live.js\" -Destination \"d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-phase-f-live.js\")",
+      "Bash(node -e \"const http=require\\('http'\\); const req=http.request\\({host:'localhost',port:3000,path:'/agent/health',method:'GET'},r=>{let b='';r.on\\('data',d=>b+=d\\);r.on\\('end',\\(\\)=>console.log\\(b\\)\\)}\\); req.end\\(\\);\")",
+      "PowerShell(Start-Process \"C:\\\\Program Files\\\\Docker\\\\Docker\\\\Docker Desktop.exe\" -ErrorAction SilentlyContinue)",
+      "Bash(docker compose *)",
+      "Bash(curl -s http://localhost:3000/users/health)",
+      "Bash(curl -s http://localhost:3000/intel/health)",
+      "Bash(curl -s http://localhost:3000/agent/health)",
+      "Bash(curl -s http://localhost:3005/agent/health)",
+      "Bash(curl -s http://localhost:3001/users/health)",
+      "Bash(curl -s http://localhost:3003/intel/health)",
+      "Bash(curl -s -X POST http://localhost:3000/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@example.com\",\"password\":\"password123\"}')",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('data',{}\\).get\\('token','FAIL:'+str\\(d\\)\\)[:200]\\)\")",
+      "Bash(redis-cli -p 6380 GET tier3_quota:a6cd83e4-b0ab-4883-81b5-d5b07f3ba1d4:__CMDSUB_OUTPUT__)",
+      "Bash(redis-cli -p 6380 DEL tier3_quota:a6cd83e4-b0ab-4883-81b5-d5b07f3ba1d4:__CMDSUB_OUTPUT__)"
     ]
   }
 }
