@@ -38,14 +38,14 @@ async function fetchAndCacheProfile(token) {
     // those fields are skipped gracefully rather than filled with mock data.
     const nameParts = (user.name ?? '').trim().split(/\s+/);
     const profile = {
-      firstName:   nameParts[0]               ?? '',
-      lastName:    nameParts.slice(1).join(' ') ?? '',
-      email:       user.email                 ?? '',
-      phone:       '',
-      linkedin:    '',
-      website:     '',
-      location:    user.target_location       ?? '',
-      coverLetter: '',
+      firstName:           nameParts[0]               ?? '',
+      lastName:            nameParts.slice(1).join(' ') ?? '',
+      email:               user.email                 ?? '',
+      phone:               '',
+      linkedin:            '',
+      website:             '',
+      location:            user.target_location       ?? '',
+      coverLetterTemplate: user.cover_letter_template ?? '',
     };
 
     await chrome.storage.local.set({

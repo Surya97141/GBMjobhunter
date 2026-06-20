@@ -49,9 +49,11 @@ function CardContent({ card, ghostScore }) {
   return (
     <>
       <div className={styles.companyRow}>
-        <div className={styles.avatar} aria-hidden="true">
-          {card.company_name?.[0] ?? '?'}
-        </div>
+        <div
+          className={styles.avatar}
+          aria-hidden="true"
+          data-initial={card.company_name?.[0] ?? '?'}
+        />
         <span className={styles.company}>{card.company_name}</span>
       </div>
 

@@ -398,6 +398,40 @@
   color: var(--color-low);
 }
 
+/* ─── COVER LETTER TEXTAREA ──────────────────────────────────────────────────── */
+
+.fieldTextarea {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--duration-fast) var(--ease-base);
+  outline: none;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.fieldTextarea:focus {
+  border-color: var(--accent);
+}
+
+.fieldTextarea::placeholder {
+  color: var(--text-muted);
+}
+
+.fieldHint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
 /* ─── RESPONSIVE ─────────────────────────────────────────────────────────────── */
 
 @media (max-width: 1024px) {

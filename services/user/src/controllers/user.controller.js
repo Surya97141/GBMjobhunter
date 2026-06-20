@@ -14,7 +14,8 @@ async function getMe(req, res) {
 
 async function updateMe(req, res) {
   try {
-    const { name, email, target_role, target_location, years_of_experience } = req.body;
+    const { name, email, target_role, target_location, years_of_experience,
+            cover_letter_template } = req.body;
 
     const fields = {};
     if (name               !== undefined) fields.name               = name;
@@ -25,6 +26,7 @@ async function updateMe(req, res) {
       const parsed = parseInt(years_of_experience, 10);
       if (!Number.isNaN(parsed)) fields.years_of_experience = parsed;
     }
+    if (cover_letter_template !== undefined) fields.cover_letter_template = cover_letter_template;
 
     if (Object.keys(fields).length === 0) {
       return sendError(res, 400, 'No valid fields to update');

@@ -7,6 +7,7 @@
     "services/jobs",
     "services/opportunity",
     "services/intelligence",
+    "services/agent",
     "web",
     "mobile",
     "shared"
@@ -15,7 +16,7 @@
     "dev": "docker-compose up -d",
     "migrate": "node scripts/migrate.js",
     "setup:clickhouse": "node scripts/setup-clickhouse.js",
-    "backend": "concurrently -n gateway,user,jobs,opportunity,intel -c cyan,green,yellow,blue,magenta \"npm run dev --workspace=@gbm/gateway\" \"npm run dev --workspace=@gbm/user-service\" \"npm run dev --workspace=@gbm/jobs-service\" \"npm run dev --workspace=@gbm/opportunity-service\" \"npm run dev --workspace=@gbm/intelligence-service\"",
+    "backend": "concurrently -n gateway,user,jobs,opportunity,intel,agent -c cyan,green,yellow,blue,magenta,white \"npm run dev --workspace=@gbm/gateway\" \"npm run dev --workspace=@gbm/user-service\" \"npm run dev --workspace=@gbm/jobs-service\" \"npm run dev --workspace=@gbm/opportunity-service\" \"npm run dev --workspace=@gbm/intelligence-service\" \"npm run dev --workspace=@gbm/agent-service\"",
     "web": "npm run dev --workspace=@gbm/web"
   },
   "devDependencies": {

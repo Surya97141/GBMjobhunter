@@ -72,6 +72,7 @@ async function callTier2(task, payload) {
     messages: [{ role: 'system', content: systemPrompt }, ...messages],
     temperature,
     max_tokens: maxTokens,
+    ...(payload.responseFormat && { response_format: payload.responseFormat }),
   });
 
   try {

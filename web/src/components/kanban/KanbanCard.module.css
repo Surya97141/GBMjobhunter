@@ -69,6 +69,11 @@
   text-transform: uppercase;
 }
 
+/* Letter rendered via CSS so it is excluded from element.textContent() reads. */
+.avatar::before {
+  content: attr(data-initial);
+}
+
 .company {
   font-family: var(--font-body);
   font-size: 13px;

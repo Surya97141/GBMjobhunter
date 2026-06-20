@@ -26,12 +26,12 @@ async function getPatternsByIds(ids) {
   return rows;
 }
 
-async function createUserInsight({ userId, patternId, headline, action }) {
+async function createUserInsight({ userId, patternId, headline, action, source = 'templated' }) {
   await pool.query(
-    `INSERT INTO user_insights (id, user_id, pattern_id, headline, action)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO user_insights (id, user_id, pattern_id, headline, action, source)
+     VALUES ($1, $2, $3, $4, $5, $6)
      ON CONFLICT DO NOTHING`,
-    [uuidv4(), userId, patternId, headline, action]
+    [uuidv4(), userId, patternId, headline, action, source]
   );
 }
 

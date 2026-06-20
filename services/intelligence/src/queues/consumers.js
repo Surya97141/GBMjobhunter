@@ -4,6 +4,7 @@ const { stripPii }          = require('../services/piiStripping');
 const { insertApplicationEvent, updateOutcomeInClickhouse } = require('../services/clickhouseWriter.service');
 const { publishInsightsForPatterns } = require('../services/insightPublisher.service');
 const { runNightlyComputation }      = require('../services/patternComputation.service');
+const { computeSkillImpactPatterns } = require('../services/skillImpact.service');
 
 const connection = { url: process.env.REDIS_URL };
 
@@ -48,6 +49,7 @@ const nightlyJobWorker = new Worker(
   'nightly-computation',
   async (job) => {
     const patternIds = await runNightlyComputation();
+    await computeSkillImpactPatterns();  // writes skill_impact rows to cohort_patterns
 
     const { Queue } = require('bullmq');
     const patternComputedQueue = new Queue('pattern.computed', { connection });

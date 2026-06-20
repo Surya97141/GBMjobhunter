@@ -205,10 +205,11 @@ function ScoreHistory({ applications }) {
 
 function ProfileEditForm({ initialUser }) {
   const [form,   setForm]   = useState({
-    name:                initialUser?.name                ?? '',
-    target_role:         initialUser?.target_role         ?? '',
-    target_location:     initialUser?.target_location     ?? '',
-    years_of_experience: initialUser?.years_of_experience ?? '',
+    name:                  initialUser?.name                  ?? '',
+    target_role:           initialUser?.target_role           ?? '',
+    target_location:       initialUser?.target_location       ?? '',
+    years_of_experience:   initialUser?.years_of_experience   ?? '',
+    cover_letter_template: initialUser?.cover_letter_template ?? '',
   });
   const [saving, setSaving] = useState(false);
   const [saved,  setSaved]  = useState(false);
@@ -229,12 +230,13 @@ function ProfileEditForm({ initialUser }) {
     setSaveError(null);
     try {
       const payload = {
-        name:                form.name.trim()               || undefined,
-        target_role:         form.target_role.trim()        || undefined,
-        target_location:     form.target_location.trim()    || undefined,
-        years_of_experience: form.years_of_experience !== ''
+        name:                  form.name.trim()               || undefined,
+        target_role:           form.target_role.trim()        || undefined,
+        target_location:       form.target_location.trim()    || undefined,
+        years_of_experience:   form.years_of_experience !== ''
           ? Number(form.years_of_experience)
           : undefined,
+        cover_letter_template: form.cover_letter_template.trim() || undefined,
       };
       await client.put('/users/me', payload);
       setSaved(true);
@@ -293,6 +295,19 @@ function ProfileEditForm({ initialUser }) {
           onChange={handleChange('years_of_experience')}
           placeholder="e.g. 3"
         />
+
+        <label className={styles.fieldLabel} htmlFor="pf-cl">Cover letter template</label>
+        <textarea
+          id="pf-cl"
+          className={styles.fieldTextarea}
+          value={form.cover_letter_template}
+          onChange={handleChange('cover_letter_template')}
+          placeholder="I am excited to apply for the {{role}} position at {{company}}."
+          rows={5}
+        />
+        <p className={styles.fieldHint}>
+          Use {'{{company}}'} and {'{{role}}'} as placeholders — they'll be filled in automatically for each application.
+        </p>
 
         <div className={styles.formFooter}>
           <button

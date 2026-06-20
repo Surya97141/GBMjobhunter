@@ -16,7 +16,7 @@ async function getOpportunities(req, res) {
 
   try {
     const { skills, interests } = result.data;
-    const recommendations = buildRecommendations(skills, interests);
+    const recommendations = await buildRecommendations(skills, interests);
     return sendSuccess(res, 200, { recommendations });
   } catch (err) {
     return sendError(res, err.statusCode || 500, err.message);

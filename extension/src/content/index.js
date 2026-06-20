@@ -287,7 +287,13 @@ function profileValueFor(profile, fieldType) {
     case FIELD.LINKEDIN:     return profile.linkedin;
     case FIELD.WEBSITE:      return profile.website;
     case FIELD.LOCATION:     return profile.location;
-    case FIELD.COVER_LETTER: return profile.coverLetter;
+    case FIELD.COVER_LETTER: {
+      const tpl = profile.coverLetterTemplate;
+      if (!tpl) return null;
+      return tpl
+        .replace(/\{\{company\}\}/g, currentMeta.company || '')
+        .replace(/\{\{role\}\}/g,    currentMeta.role    || '');
+    }
     default:                 return null;
   }
 }

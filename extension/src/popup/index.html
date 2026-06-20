@@ -128,8 +128,21 @@
     <div class="divider"></div>
 
     <div class="actions">
-      <button id="btn-autofill" class="btn btn-primary   btn-full">Auto-fill Application</button>
-      <button id="btn-log"      class="btn btn-secondary btn-full">Log as Applied</button>
+      <button id="btn-autofill"    class="btn btn-primary   btn-full">Auto-fill Application</button>
+      <button id="btn-generate-cl" class="btn btn-secondary btn-full">Generate tailored cover letter</button>
+      <p     id="cl-generate-msg"  class="cl-msg"            hidden></p>
+      <button id="btn-generate-outreach" class="btn btn-secondary btn-full">Draft outreach message</button>
+      <button id="btn-contact-toggle"    class="contact-toggle">+ Add contact details (optional)</button>
+      <div id="contact-fields" class="contact-fields" hidden>
+        <input id="contact-name" class="contact-input" type="text" placeholder="Contact name (optional)">
+        <input id="contact-role" class="contact-input" type="text" placeholder="Contact's role (optional)">
+      </div>
+      <div id="outreach-block" class="outreach-block" hidden>
+        <p      id="outreach-text"     class="outreach-text"></p>
+        <button id="btn-copy-outreach" class="btn btn-outline btn-full">Copy message</button>
+      </div>
+      <p id="outreach-msg" class="cl-msg" hidden></p>
+      <button id="btn-log"         class="btn btn-secondary btn-full">Log as Applied</button>
     </div>
 
   </div>

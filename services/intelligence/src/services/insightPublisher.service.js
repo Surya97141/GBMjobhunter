@@ -1,3 +1,4 @@
+const { generateDiagnosis } = require('./diagnosticGenerator.service');
 const axios = require('axios');
 const insightsDb = require('../db/insights.db');
 const usersDb    = require('../db/users.db');
@@ -53,8 +54,13 @@ async function publishInsightsForPatterns(patternIds) {
     const skills = pattern.skill_cluster.split('.');
     const users  = await usersDb.getUsersWithSkillsIn(skills);
 
-    const headline = buildHeadline(pattern);
-    const action   = buildAction(pattern);
+    // Generate once per pattern — reused for every matched user in this run.
+    // Any failure (not_configured, parse_error, other_error) falls through to
+    // the existing templated strings, which are called exactly as before.
+    const diagnosis = await generateDiagnosis(pattern);
+    const headline  = diagnosis.success ? diagnosis.headline : buildHeadline(pattern);
+    const action    = diagnosis.success ? diagnosis.action   : buildAction(pattern);
+    const source    = diagnosis.success ? 'generated'        : 'templated';
 
     for (const user of users) {
       const userCluster = buildSkillCluster(user.resume_json);
@@ -65,6 +71,7 @@ async function publishInsightsForPatterns(patternIds) {
         patternId: pattern.id,
         headline,
         action,
+        source,
       });
 
       await sendFcmNotification(user.id, headline);

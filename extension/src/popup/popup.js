@@ -1,6 +1,7 @@
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const WEB_APP_URL = 'http://localhost:5173';
+const API_BASE    = 'http://localhost:3000';
 
 // Ring SVG math: r=36, C = 2π × 36 ≈ 226.19
 const RING_C = 2 * Math.PI * 36;
@@ -12,6 +13,16 @@ const ALL_STATES = ['auth', 'idle', 'job', 'filling'];
 // ─── CURRENT JOB (carried across states) ──────────────────────────────────────
 
 let currentJob = null; // { company, role, fields }
+
+// ─── MODEL TEXT EXTRACTION ────────────────────────────────────────────────────
+
+function extractModelText(result) {
+  const tier2 = result.data?.choices?.[0]?.message?.content;
+  if (typeof tier2 === 'string' && tier2.trim()) return tier2.trim();
+  const tier3 = result.data?.content?.[0]?.text;
+  if (typeof tier3 === 'string' && tier3.trim()) return tier3.trim();
+  return '';
+}
 
 // ─── STATE MACHINE ────────────────────────────────────────────────────────────
 
@@ -253,6 +264,142 @@ document.getElementById('link-signup').addEventListener('click', (e) => {
     chrome.tabs.create({ url });
   } else {
     window.open(url, '_blank');
+  }
+});
+
+document.getElementById('btn-generate-cl').addEventListener('click', async () => {
+  if (!currentJob) return;
+
+  const btn = document.getElementById('btn-generate-cl');
+  const msg = document.getElementById('cl-generate-msg');
+
+  btn.disabled    = true;
+  btn.textContent = 'Generating…';
+  msg.hidden      = true;
+
+  try {
+    const { auth_token } = await chrome.storage.local.get('auth_token').catch(() => ({}));
+
+    const res = await fetch(`${API_BASE}/agent/generate-cover-letter`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${auth_token}`,
+      },
+      body: JSON.stringify({
+        role:           currentJob.role    ?? '',
+        company:        currentJob.company ?? '',
+        jobDescription: currentJob.jdText  ?? '',
+      }),
+    });
+
+    const result = await res.json();
+
+    if (result.success === true) {
+      const text = extractModelText(result);
+      if (text) {
+        // Fill the cover letter field on the active job page tab
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true }).catch(() => []);
+        if (tab?.id) {
+          await chrome.tabs.sendMessage(tab.id, {
+            type: 'START_AUTOFILL',
+            profile: {
+              firstName: '', lastName: '', email: '', phone: '',
+              linkedin: '', website: '', location: '',
+              // Generated text has no placeholders — regex replaces are no-ops
+              coverLetterTemplate: text,
+            },
+          }).catch(() => {});
+        }
+      }
+      // No message on success — the filled field is the visible feedback
+    } else if (result.error === 'not_configured') {
+      msg.textContent = "AI generation isn’t available yet — your saved template will be used instead.";
+      msg.hidden = false;
+    } else {
+      msg.textContent = "Couldn’t generate right now — your saved template will be used.";
+      msg.hidden = false;
+    }
+  } catch (_) {
+    msg.textContent = "Couldn’t generate right now — your saved template will be used.";
+    msg.hidden = false;
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Generate tailored cover letter';
+  }
+});
+
+document.getElementById('btn-contact-toggle').addEventListener('click', () => {
+  const fields = document.getElementById('contact-fields');
+  fields.hidden = !fields.hidden;
+  document.getElementById('btn-contact-toggle').textContent =
+    fields.hidden ? '+ Add contact details (optional)' : '− Hide contact details';
+});
+
+document.getElementById('btn-generate-outreach').addEventListener('click', async () => {
+  if (!currentJob) return;
+
+  const btn     = document.getElementById('btn-generate-outreach');
+  const msg     = document.getElementById('outreach-msg');
+  const block   = document.getElementById('outreach-block');
+  const textEl  = document.getElementById('outreach-text');
+  const copyBtn = document.getElementById('btn-copy-outreach');
+
+  btn.disabled    = true;
+  btn.textContent = 'Drafting…';
+  msg.hidden      = true;
+  block.hidden    = true;
+
+  const contactName = document.getElementById('contact-name').value.trim();
+  const contactRole = document.getElementById('contact-role').value.trim();
+
+  try {
+    const { auth_token } = await chrome.storage.local.get('auth_token').catch(() => ({}));
+
+    const res = await fetch(`${API_BASE}/agent/generate-outreach`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${auth_token}`,
+      },
+      body: JSON.stringify({
+        companyName: currentJob.company ?? '',
+        roleTitle:   currentJob.role    ?? '',
+        jdText:      currentJob.jdText  ?? '',
+        ...(contactName && { contactName }),
+        ...(contactRole && { contactRole }),
+      }),
+    });
+
+    const result = await res.json();
+
+    if (result.success === true) {
+      const text = extractModelText(result);
+      if (text) {
+        textEl.textContent = text;
+        block.hidden = false;
+        copyBtn.onclick = async () => {
+          await navigator.clipboard.writeText(text).catch(() => {});
+          copyBtn.textContent = '✓ Copied';
+          setTimeout(() => { copyBtn.textContent = 'Copy message'; }, 2000);
+        };
+      }
+    } else if (result.error === 'not_configured') {
+      msg.textContent = "AI outreach drafting isn't set up yet.";
+      msg.hidden = false;
+    } else if (result.error === 'quota_exceeded') {
+      msg.textContent = result.message ?? 'Daily outreach limit reached. Resets at midnight UTC.';
+      msg.hidden = false;
+    } else {
+      msg.textContent = "Couldn't draft right now — try again in a moment.";
+      msg.hidden = false;
+    }
+  } catch (_) {
+    msg.textContent = "Couldn't draft right now — try again in a moment.";
+    msg.hidden = false;
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Draft outreach message';
   }
 });
 

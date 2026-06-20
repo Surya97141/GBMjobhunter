@@ -13,7 +13,7 @@ async function findUserById(id) {
     `SELECT
        id, email, name, ats_score_cache,
        target_role, target_location,
-       years_of_experience, created_at
+       years_of_experience, cover_letter_template, created_at
      FROM users
      WHERE id = $1`,
     [id]
@@ -39,6 +39,7 @@ async function updateUserProfile(userId, fields) {
     'name', 'email',
     'target_role', 'target_location',
     'years_of_experience',
+    'cover_letter_template',
   ];
 
   const updates = [];
@@ -64,7 +65,7 @@ async function updateUserProfile(userId, fields) {
      RETURNING
        id, email, name, ats_score_cache,
        target_role, target_location,
-       years_of_experience, created_at`,
+       years_of_experience, cover_letter_template, created_at`,
     values
   );
   return rows[0] || null;

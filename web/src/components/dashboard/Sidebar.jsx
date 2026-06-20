@@ -82,7 +82,7 @@ export default function Sidebar() {
       <button
         className={styles.themeToggle}
         onClick={handleToggle}
-        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        aria-label={isDark ? 'Switch to cream theme' : 'Switch to obsidian theme'}
       >
         {isDark ? <SunIcon /> : <MoonIcon />}
         <span>{isDark ? 'Light mode' : 'Dark mode'}</span>
