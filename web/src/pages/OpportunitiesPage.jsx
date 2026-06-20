@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import client from '../api/client';
 import styles from './OpportunitiesPage.module.css';
 
@@ -10,7 +10,7 @@ const TOPICS = [
   { value: 'behavioral round',                  label: 'Behavioral round'              },
   { value: 'recruiter first-30-seconds screen', label: 'Recruiter 30-second screen'    },
   { value: 'talking about a project',           label: 'Talking about a project'       },
-  { value: 'what culture fit means',            label: 'What “culture fit” means'     },
+  { value: 'what culture fit means',            label: 'What "culture fit" means'     },
   { value: 'following up after an interview',   label: 'Following up after interview'   },
 ];
 
@@ -48,13 +48,13 @@ function HiddenCurriculumDecoder() {
           setText(explanation);
           setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
         }
-      } else if (result.error === ‘not_configured’) {
-        setMsg("AI decoding isn’t set up yet — a Tier 2 model needs to be configured.");
+      } else if (result.error === 'not_configured') {
+        setMsg('AI decoding is not set up yet — a Tier 2 model needs to be configured.');
       } else {
-        setMsg("Couldn’t generate right now — try again in a moment.");
+        setMsg('Could not generate right now — try again in a moment.');
       }
     } catch {
-      setMsg("Couldn’t generate right now — try again in a moment.");
+      setMsg('Could not generate right now — try again in a moment.');
     } finally {
       setLoading(false);
     }

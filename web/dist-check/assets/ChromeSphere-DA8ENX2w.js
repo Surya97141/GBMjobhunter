@@ -1,0 +1,1 @@
+import{j as e}from"./index-CdMrsOZl.js";const s="_wrapper_6ypci_1",p="_sphere_6ypci_10",r={wrapper:s,sphere:p};function t(){return e.jsx("div",{className:r.wrapper,children:e.jsx("div",{className:r.sphere})})}export{t as default};

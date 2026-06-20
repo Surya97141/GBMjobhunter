@@ -1,0 +1,1 @@
+const _="_page_1xchs_1",s="_card_1xchs_10",t="_logo_1xchs_19",c="_title_1xchs_27",o="_sub_1xchs_35",n="_form_1xchs_41",h="_label_1xchs_47",l="_hint_1xchs_56",r="_input_1xchs_61",e="_error_1xchs_84",i="_btn_1xchs_94",x="_link_1xchs_119",a={page:_,card:s,logo:t,title:c,sub:o,form:n,label:h,hint:l,input:r,error:e,btn:i,switch:"_switch_1xchs_112",link:x};export{a as s};
