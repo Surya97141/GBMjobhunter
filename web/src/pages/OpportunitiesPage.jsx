@@ -1,6 +1,104 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import client from '../api/client';
 import styles from './OpportunitiesPage.module.css';
+
+// ─── Hidden Curriculum Decoder ────────────────────────────────────────────────
+
+// value = exact string validated by server's CURRICULUM_TOPICS Set.
+// label = display text only — never sent to the server.
+const TOPICS = [
+  { value: 'behavioral round',                  label: 'Behavioral round'              },
+  { value: 'recruiter first-30-seconds screen', label: 'Recruiter 30-second screen'    },
+  { value: 'talking about a project',           label: 'Talking about a project'       },
+  { value: 'what culture fit means',            label: 'What “culture fit” means'     },
+  { value: 'following up after an interview',   label: 'Following up after interview'   },
+];
+
+// Shared extraction logic duplicated from popup.js extractModelText —
+// intentional: web app (Vite) and extension (MV3, no build step) have no
+// shared module system between them.
+function extractText(result) {
+  const tier2 = result.data?.choices?.[0]?.message?.content;
+  if (typeof tier2 === 'string' && tier2.trim()) return tier2.trim();
+  const tier3 = result.data?.content?.[0]?.text;
+  if (typeof tier3 === 'string' && tier3.trim()) return tier3.trim();
+  return '';
+}
+
+function HiddenCurriculumDecoder() {
+  const [selected, setSelected] = useState(null);
+  const [loading,  setLoading]  = useState(false);
+  const [text,     setText]     = useState('');
+  const [msg,      setMsg]      = useState('');
+  const outputRef = useRef(null);
+
+  async function handleDecode() {
+    if (!selected || loading) return;
+    setLoading(true);
+    setText('');
+    setMsg('');
+
+    try {
+      const res    = await client.post('/agent/explain-hiring-process', { topic: selected }, { timeout: 30000 });
+      const result = res.data;
+
+      if (result.success === true) {
+        const explanation = extractText(result);
+        if (explanation) {
+          setText(explanation);
+          setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+        }
+      } else if (result.error === ‘not_configured’) {
+        setMsg("AI decoding isn’t set up yet — a Tier 2 model needs to be configured.");
+      } else {
+        setMsg("Couldn’t generate right now — try again in a moment.");
+      }
+    } catch {
+      setMsg("Couldn’t generate right now — try again in a moment.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section className={styles.decoderSection}>
+      <h2 className={styles.sectionTitle}>Hidden Curriculum Decoder</h2>
+      <p className={styles.sectionHint}>
+        What the hiring process actually tests — explained using your real skills as the example.
+      </p>
+
+      <div className={styles.topicPicker} role="group" aria-label="Select a topic">
+        {TOPICS.map(({ value, label }) => (
+          <button
+            key={value}
+            className={`${styles.topicBtn} ${selected === value ? styles.topicBtnActive : ''}`}
+            onClick={() => { setSelected(value); setText(''); setMsg(''); }}
+            disabled={loading}
+            aria-pressed={selected === value}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <button
+        className={styles.decodeBtn}
+        onClick={handleDecode}
+        disabled={!selected || loading}
+      >
+        {loading ? 'Decoding…' : 'Decode this'}
+      </button>
+
+      {text && (
+        <div ref={outputRef} className={styles.decoderOutput}>
+          <p className={styles.decoderText}>{text}</p>
+        </div>
+      )}
+
+      {msg && <p className={styles.decoderMsg}>{msg}</p>}
+    </section>
+  );
+}
 
 // ─── Level badge colours via data-level attribute ─────────────────────────────
 // foundational = green (approachable), intermediate = amber, advanced = red
@@ -199,6 +297,8 @@ export default function OpportunitiesPage() {
         </section>
 
       </div>
+
+      <HiddenCurriculumDecoder />
 
     </main>
   );

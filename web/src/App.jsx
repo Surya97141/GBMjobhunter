@@ -49,7 +49,7 @@ function AnimatedRoutes() {
           </ProtectedRoute>
         }>
           <Route index element={<Suspense fallback={null}><DashboardPage /></Suspense>} />
-          <Route path="applications" element={<Suspense fallback={null}><KanbanPage /></Suspense>} />
+          <Route path="tracker" element={<Suspense fallback={null}><KanbanPage /></Suspense>} />
           <Route path="insights" element={<Suspense fallback={null}><InsightsPage /></Suspense>} />
           <Route path="profile"       element={<Suspense fallback={null}><ProfilePage /></Suspense>} />
           <Route path="opportunities" element={<Suspense fallback={null}><OpportunitiesPage /></Suspense>} />

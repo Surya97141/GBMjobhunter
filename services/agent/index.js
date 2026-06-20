@@ -162,6 +162,77 @@ router.post('/generate-outreach', async (req, res) => {
   }
 });
 
+// ── Hidden Curriculum Decoder — Tier 2 ───────────────────────────────────────
+// Explains unwritten hiring-process rules using the four-barrier Schema Fit
+// method, personalised with the user's actual skills as the Barrier 2 example.
+// Plain prose output — no JSON parsing needed (confirmed same as cover letter path).
+const CURRICULUM_TOPICS = new Set([
+  'behavioral round',
+  'recruiter first-30-seconds screen',
+  'talking about a project',
+  'what culture fit means',
+  'following up after an interview',
+]);
+
+const CURRICULUM_SYSTEM_PROMPT =
+  'You are a learning assistant that defeats four specific cognitive barriers when ' +
+  'explaining unfamiliar concepts to someone with no prior exposure to corporate hiring.\n\n' +
+  'Barrier 1 — Overload: translate ALL jargon into plain language. Never use a technical ' +
+  'or corporate term without immediately explaining it in everyday words.\n\n' +
+  'Barrier 2 — Abstractness: never explain a concept using only abstract description. ' +
+  'Always ground it in one concrete, relatable example or analogy using the applicant\'s ' +
+  'actual skills provided — not a generic placeholder.\n\n' +
+  'Barrier 3 — Element interactivity: never explain a whole complex process at once. ' +
+  'Chunk it — explain one piece, confirm it lands, then add the next piece on top.\n\n' +
+  'Barrier 4 — Interference: end with one short check that tests whether the explanation ' +
+  'actually transferred, framed as "if this is true, then X should also be true — does ' +
+  'that make sense?" rather than just asking "did you understand?"';
+
+router.post('/explain-hiring-process', async (req, res) => {
+  const userId = req.headers['x-user-id'];
+  if (!userId) {
+    return res.status(401).json({ status: 'error', message: 'x-user-id header required' });
+  }
+
+  const { topic } = req.body ?? {};
+  if (!topic || !CURRICULUM_TOPICS.has(topic)) {
+    return res.status(400).json({
+      status:  'error',
+      message: `topic is required and must be one of: ${[...CURRICULUM_TOPICS].join(', ')}`,
+    });
+  }
+
+  let skills = [];
+  try {
+    skills = await getUserSkills(userId);
+  } catch (err) {
+    console.error('[CurriculumDecoder] Skills lookup failed:', err.message);
+  }
+
+  const skillsLine = skills.length
+    ? `The applicant's skills: ${skills.join(', ')}. Use one of these skills as the ` +
+      `concrete example required by Barrier 2 — not a generic placeholder.`
+    : 'The applicant has not uploaded a resume yet. Use a generic but relatable skill ' +
+      'example (e.g. "writing code" or "building a spreadsheet") for Barrier 2.';
+
+  try {
+    const result = await callModel('tier2', 'curriculum_explain', {
+      systemPrompt: CURRICULUM_SYSTEM_PROMPT,
+      messages: [{
+        role:    'user',
+        content: `Topic: ${topic}\n\n${skillsLine}`,
+      }],
+      maxTokens:   700,
+      temperature: 0.6,
+    });
+
+    // Plain prose output — no JSON parsing (same pattern as cover letter and outreach routes).
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'internal_error', message: err.message });
+  }
+});
+
 // All routes are mounted under /agent — matching how the gateway proxies them.
 // gateway: router.use('/agent', ...) → forwards /agent/* unchanged.
 app.use('/agent', router);

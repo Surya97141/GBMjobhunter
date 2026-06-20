@@ -5,7 +5,7 @@ import styles from './Sidebar.module.css';
 
 const NAV_ITEMS = [
   { to: '/dashboard',               label: 'Dashboard',     end: true  },
-  { to: '/dashboard/applications',  label: 'Applications',  end: false },
+  { to: '/dashboard/tracker',        label: 'Tracker',       end: false },
   { to: '/dashboard/insights',      label: 'Insights',      end: false },
   { to: '/dashboard/profile',       label: 'Profile',       end: false },
   { to: '/dashboard/opportunities', label: 'Opportunities', end: false },

@@ -226,6 +226,9 @@ async function main() {
     }
 
     // CHECK 3.3: Why? expands
+    // Known gap: never asserts ghost-reasons' initial hidden state before clicking Why?,
+    // which is how the [hidden] CSS specificity bug (fixed in Phase G) went undetected here.
+    // Uses DOM .hidden property, not Playwright isHidden() — initial state remains untested.
     const whyHidden = await popupPage.evaluate(() => document.getElementById('ghost-why-btn')?.hidden);
     if (!whyHidden) {
       await popupPage.click('#ghost-why-btn');

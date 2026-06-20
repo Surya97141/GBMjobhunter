@@ -272,7 +272,7 @@ export default function DashboardPage() {
                 );
               })}
             </div>
-            <Link to="/dashboard/applications" className={styles.viewAll}>
+            <Link to="/dashboard/tracker" className={styles.viewAll}>
               View all applications →
             </Link>
           </>

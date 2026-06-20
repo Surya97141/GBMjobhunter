@@ -246,3 +246,103 @@
 .errorText {
   color: var(--color-low);
 }
+
+/* ─── Hidden Curriculum Decoder ───────────────────────────────────────────── */
+
+.decoderSection {
+  margin-top: 48px;
+  padding: 32px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.topicPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.topicBtn {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-base),
+    color var(--duration-fast) var(--ease-base),
+    border-color var(--duration-fast) var(--ease-base);
+}
+
+.topicBtn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.topicBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.topicBtnActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.topicBtnActive:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+
+.decodeBtn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-base);
+}
+
+.decodeBtn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.decodeBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.decoderOutput {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.decoderText {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.decoderMsg {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}

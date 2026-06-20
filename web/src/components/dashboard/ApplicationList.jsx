@@ -39,7 +39,7 @@ export default function ApplicationList({ applications = [], loading = false }) 
 
       <div className={styles.sectionHeader}>
         <Heading as="h2">Recent Applications</Heading>
-        <a href="/dashboard/applications" className={styles.viewAll}>View all →</a>
+        <a href="/dashboard/tracker" className={styles.viewAll}>View all →</a>
       </div>
 
       <table className={styles.table}>

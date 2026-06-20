@@ -5,7 +5,7 @@
 const path = require('path');
 const fs   = require('fs');
 
-require('dotenv').config({ path: './services/intelligence/.env' });
+require('dotenv').config({ path: path.resolve(__dirname, '../../services/intelligence/.env') });
 
 // ─── Test patterns — three genuinely different finding shapes ─────────────────
 // Pattern A: ghost_rate > 0.6  → buildAction branch 1 (mentions avg ATS score)
@@ -76,7 +76,7 @@ function note(msg)       { console.log(`     ${msg}`); }
 
 // ─── Temp counter injection ───────────────────────────────────────────────────
 
-const DIAG_PATH    = path.resolve(__dirname, 'services/intelligence/src/services/diagnosticGenerator.service.js');
+const DIAG_PATH    = path.resolve(__dirname, '../../services/intelligence/src/services/diagnosticGenerator.service.js');
 const COUNTER_MARK = 'PHASE_F_COUNTER';
 const NEEDLE       = 'async function generateDiagnosis(pattern) {\n';
 const COUNTER_LINE = `  console.log('[DiagnosticGenerator] ${COUNTER_MARK} called for pattern:', pattern.id);\n`;
@@ -107,8 +107,8 @@ function clearServiceCache() {
 async function main() {
   console.log('\n═══ Phase F Step 4 — Rejection Diagnostician Verification ═══\n');
 
-  const pool       = require('./services/intelligence/src/db/pool');
-  const insightsDb = require('./services/intelligence/src/db/insights.db');
+  const pool       = require(path.resolve(__dirname, '../../services/intelligence/src/db/pool'));
+  const insightsDb = require(path.resolve(__dirname, '../../services/intelligence/src/db/insights.db'));
 
   // ── Seed test patterns ────────────────────────────────────────────────────
   const patternIds = [];
@@ -150,7 +150,7 @@ async function main() {
   let pipelineError = null;
   try {
     const { publishInsightsForPatterns } =
-      require('./services/intelligence/src/services/insightPublisher.service');
+      require(path.resolve(__dirname, '../../services/intelligence/src/services/insightPublisher.service'));
     await publishInsightsForPatterns(patternIds);
   } catch (err) {
     pipelineError = err;
