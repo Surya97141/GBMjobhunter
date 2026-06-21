@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Label, Subheading, Body } from '../../components/Typography';
 import styles from './FeaturesSection.module.css';
 
+// PLACEHOLDER — swap for real on-brand scenes from community.spline.design before launch.
 const FEATURES = [
   {
     index: '01',
     title: 'ATS Intelligence',
+    sceneUrl: 'https://prod.spline.design/fJ2ptJKzT-sDkpfO/scene.splinecode',
     description:
       'Score your resume against any job description before you hit submit. Our TF-IDF keyword engine surfaces exactly which terms you\'re missing and explains why automated screeners reject applications before a human ever reads them.',
     tags: ['TF-IDF Scoring', 'Keyword Gap Analysis', 'JD Fingerprinting', 'ATS Platform Detection'],
@@ -14,6 +16,7 @@ const FEATURES = [
   {
     index: '02',
     title: 'Ghost Pattern Detection',
+    sceneUrl: 'https://prod.spline.design/UWoeqiir20o49Dah/scene.splinecode',
     description:
       'Track which companies ghost, which respond inside a week, and what seniority level actually hears back. Built from anonymised cohort data — so you know where your application is likely to disappear before you send it.',
     tags: ['Ghost Rate by Company', 'Response Windows', 'Seniority Signals', 'Follow-up Timing'],
@@ -21,6 +24,7 @@ const FEATURES = [
   {
     index: '03',
     title: 'Cohort Insights',
+    sceneUrl: 'https://prod.spline.design/LEvjG3OETYd2GsRw/scene.splinecode',
     description:
       'Anonymous patterns from developers with your exact skill set. See what\'s working for people who look like you on paper — without exposing anyone\'s data. PII-stripped from day one, statistically valid at 50+ members.',
     tags: ['Anonymous Cohorts', 'Skill-Based Matching', 'Outcome Patterns', 'PII-Free by Design'],
@@ -95,6 +99,12 @@ export default function FeaturesSection() {
                       </ul>
 
                     </div>
+
+                    {f.sceneUrl && (
+                      <div className={styles.sceneContainer}>
+                        <spline-viewer url={f.sceneUrl}></spline-viewer>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>

@@ -161,3 +161,27 @@
     gap: 0;
   }
 }
+
+/* ─── SPLINE VIEWER ─────────────────────────────────────────────────────────── */
+
+.sceneContainer {
+  /* Fixed height prevents layout jump while the scene is fetching.
+     Background gives a visible surface during the load window. */
+  margin: 0 0 40px 72px;
+  height: 200px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sceneContainer spline-viewer {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .sceneContainer {
+    margin-left: 0;
+  }
+}

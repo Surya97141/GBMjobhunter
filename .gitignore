@@ -7,3 +7,4 @@ build/
 .DS_Store
 coverage/
 /scripts/dev-verification/*.png
+.claude/

@@ -103,7 +103,9 @@
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-win1.js)",
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-win2.js)",
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-win3.js)",
-      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-part3.js)"
+      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-part3.js)",
+      "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-part4.js)",
+      "PowerShell(Start-Process -FilePath \"cmd\" -ArgumentList \"/c\", \"cd /d d:\\\\GBMjobhunter\\\\web && npm run dev > d:\\\\GBMjobhunter\\\\logs-web.txt 2>&1\" -WindowStyle Hidden)"
     ]
   }
 }
