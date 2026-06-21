@@ -62,7 +62,7 @@
 
 :global([data-theme="obsidian"]) .card {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--border-card);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(167, 139, 250, 0.10);

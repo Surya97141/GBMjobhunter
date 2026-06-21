@@ -107,7 +107,12 @@
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-part4.js)",
       "PowerShell(Start-Process -FilePath \"cmd\" -ArgumentList \"/c\", \"cd /d d:\\\\GBMjobhunter\\\\web && npm run dev > d:\\\\GBMjobhunter\\\\logs-web.txt 2>&1\" -WindowStyle Hidden)",
       "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:5173\" -TimeoutSec 3 -UseBasicParsing; \"RUNNING: $\\($r.StatusCode\\)\" } catch { \"NOT RUNNING\" })",
-      "Bash(node scripts/dev-verification/verify-step14a.js)"
+      "Bash(node scripts/dev-verification/verify-step14a.js)",
+      "Bash(node scripts/dev-verification/verify-step14d.js)",
+      "Bash(sed -i 's|^import { useState, useEffect, useRef } from '\\\\''react'\\\\'';|import { useState, useEffect, useRef } from '\\\\''react'\\\\'';\\\\nimport { Display } from '\\\\''../components/Typography'\\\\'';|' web/src/pages/OpportunitiesPage.jsx)",
+      "Bash(sed -i 's|<h1 className={styles.pageTitle}>Opportunities</h1>|<Display as=\"h1\" className={styles.pageTitle}>Opportunities</Display>|' web/src/pages/OpportunitiesPage.jsx)",
+      "Bash(sed -i 's|^import { useState, useEffect, useRef, useCallback } from '\\\\''react'\\\\'';|import { useState, useEffect, useRef, useCallback } from '\\\\''react'\\\\'';\\\\nimport { Display } from '\\\\''../components/Typography'\\\\'';|' web/src/pages/ProfilePage.jsx)",
+      "Bash(sed -i 's|<h1 className={styles.pageTitle}>Profile</h1>|<Display as=\"h1\" className={styles.pageTitle}>Profile</Display>|' web/src/pages/ProfilePage.jsx)"
     ]
   }
 }

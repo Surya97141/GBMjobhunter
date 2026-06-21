@@ -73,7 +73,7 @@
 }
 
 :global([data-theme="obsidian"]) .card:hover {
-  border-color: rgba(167, 139, 250, 0.40);
+  border-color: var(--accent-focus);
 }
 
 /* Fallback: backdrop-filter unsupported (Firefox < 103, some mobile browsers) */

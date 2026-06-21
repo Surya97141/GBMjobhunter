@@ -27,7 +27,7 @@
 /* ── Obsidian card: glass ─────────────────────────────────────────────────── */
 :global([data-theme="obsidian"]) .card {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.10);
+  border-color: var(--border-card);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 2px 10px rgba(167, 139, 250, 0.07);

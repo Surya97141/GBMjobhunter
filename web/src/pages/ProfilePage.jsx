@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Display } from '../components/Typography';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -371,7 +372,7 @@ export default function ProfilePage() {
     <main className={styles.page}>
 
       <header className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Profile</h1>
+        <Display as="h1" className={styles.pageTitle}>Profile</Display>
         <p className={styles.pageSubtitle}>
           Upload your resume to unlock ATS scoring on every application you log.
         </p>

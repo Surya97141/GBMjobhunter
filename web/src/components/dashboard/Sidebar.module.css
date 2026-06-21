@@ -138,7 +138,7 @@
 }
 
 .logoutBtn:hover {
-  color: #f87171;
+  color: var(--color-low);
 }
 
 @media (max-width: 768px) {

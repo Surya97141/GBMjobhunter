@@ -10,3 +10,14 @@ Re-optimizing dependencies because vite config has changed
   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
 [2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
 [2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m10:34:28 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/components/dashboard/InsightCards.jsx[22m
+[2m10:34:33 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/components/dashboard/InsightCards.jsx[22m
+[2m10:34:38 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/components/dashboard/InsightCards.jsx[22m
+[2m11:00:58 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/styles/themes.css[22m
+[2m11:08:17 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/components/dashboard/InsightCards.jsx[22m
+[2m11:08:25 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/components/dashboard/Sidebar.jsx[22m
+[2m3:39:11 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/pages/OpportunitiesPage.jsx[22m
+[2m3:39:12 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/pages/OpportunitiesPage.jsx[22m
+[2m3:39:12 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/pages/ProfilePage.jsx[22m
+[2m3:39:13 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/pages/ProfilePage.jsx[22m
+[2m3:54:46 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/D:/GBMjobhunter/web/src/pages/OpportunitiesPage.jsx[22m

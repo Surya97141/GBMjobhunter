@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react';
+import { Display } from '../components/Typography';
 import client from '../api/client';
 import styles from './OpportunitiesPage.module.css';
 
@@ -251,7 +252,7 @@ export default function OpportunitiesPage() {
     <main className={styles.page}>
 
       <header className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Opportunities</h1>
+        <Display as="h1" className={styles.pageTitle}>Opportunities</Display>
         <p className={styles.pageSubtitle}>
           Skills to learn next and communities to join — personalised to your resume.
         </p>
@@ -307,3 +308,4 @@ export default function OpportunitiesPage() {
     </main>
   );
 }
+
