@@ -12,8 +12,7 @@
     "bullmq": "^5.0.0",
     "dotenv": "^16.0.0",
     "pg": "^8.11.0",
-    "uuid": "^9.0.0",
-    "@clickhouse/client": "^0.2.0"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "jest": "^29.0.0"

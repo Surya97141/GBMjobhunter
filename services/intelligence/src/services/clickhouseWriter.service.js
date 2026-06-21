@@ -1,49 +1,34 @@
-const { client } = require('../db/clickhouse');
+const pool = require('../db/pool');
 
 async function insertApplicationEvent(stripped) {
-  await client.insert({
-    table:  'application_events',
-    values: [{
-      application_id:       stripped.applicationId,
-      anonymised_cohort_id: stripped.anonymisedCohortId,
-      role_bucket:          stripped.roleBucket || 'unspecified',
-      skill_cluster:        stripped.skillCluster,
-      ats_score:            stripped.atsScore    ?? null,
-      company_size_band:    stripped.companySizeBand ?? null,
-      ats_platform:         stripped.atsPlatform || 'unknown',
-      outcome:              'pending',
-      response_days:        null,
-      applied_at:           new Date(stripped.appliedAt).toISOString().replace('T', ' ').slice(0, 19),
-    }],
-    format: 'JSONEachRow',
-  });
+  await pool.query(
+    `INSERT INTO application_events
+       (application_id, anonymised_cohort_id, role_bucket, skill_cluster,
+        ats_score, company_size_band, ats_platform, outcome, response_days, applied_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     ON CONFLICT (application_id) DO NOTHING`,
+    [
+      stripped.applicationId,
+      stripped.anonymisedCohortId,
+      stripped.roleBucket      || 'unspecified',
+      stripped.skillCluster,
+      stripped.atsScore        ?? null,
+      stripped.companySizeBand ?? null,
+      stripped.atsPlatform     || 'unknown',
+      'pending',
+      null,
+      new Date(stripped.appliedAt).toISOString(),
+    ]
+  );
 }
 
-async function updateOutcomeInClickhouse(applicationId, outcome, responseDays) {
-  const { rows } = await client.query({
-    query: `
-      SELECT application_id, anonymised_cohort_id, role_bucket,
-             skill_cluster, ats_score, company_size_band, ats_platform, applied_at
-      FROM application_events FINAL
-      WHERE application_id = {applicationId: String}
-      LIMIT 1
-    `,
-    query_params: { applicationId },
-    format: 'JSONEachRow',
-  }).then(r => r.json());
-
-  if (!rows || rows.length === 0) return;
-
-  const existing = rows[0];
-  await client.insert({
-    table: 'application_events',
-    values: [{
-      ...existing,
-      outcome,
-      response_days: responseDays ?? null,
-    }],
-    format: 'JSONEachRow',
-  });
+async function updateApplicationOutcome(applicationId, outcome, responseDays) {
+  await pool.query(
+    `UPDATE application_events
+     SET outcome = $1, response_days = $2
+     WHERE application_id = $3`,
+    [outcome, responseDays ?? null, applicationId]
+  );
 }
 
-module.exports = { insertApplicationEvent, updateOutcomeInClickhouse };
+module.exports = { insertApplicationEvent, updateApplicationOutcome };

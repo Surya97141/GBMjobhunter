@@ -1,6 +1,7 @@
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+// API_BASE — loaded from src/config.js; swap the value there before packaging.
+importScripts('../config.js');
 
-const API_BASE = 'http://localhost:3000'; // gateway (Fix 1: was 8080)
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY_TOKEN      = 'auth_token';
 const STORAGE_KEY_PROFILE    = 'user_profile';

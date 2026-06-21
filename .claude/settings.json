@@ -112,7 +112,13 @@
       "Bash(sed -i 's|^import { useState, useEffect, useRef } from '\\\\''react'\\\\'';|import { useState, useEffect, useRef } from '\\\\''react'\\\\'';\\\\nimport { Display } from '\\\\''../components/Typography'\\\\'';|' web/src/pages/OpportunitiesPage.jsx)",
       "Bash(sed -i 's|<h1 className={styles.pageTitle}>Opportunities</h1>|<Display as=\"h1\" className={styles.pageTitle}>Opportunities</Display>|' web/src/pages/OpportunitiesPage.jsx)",
       "Bash(sed -i 's|^import { useState, useEffect, useRef, useCallback } from '\\\\''react'\\\\'';|import { useState, useEffect, useRef, useCallback } from '\\\\''react'\\\\'';\\\\nimport { Display } from '\\\\''../components/Typography'\\\\'';|' web/src/pages/ProfilePage.jsx)",
-      "Bash(sed -i 's|<h1 className={styles.pageTitle}>Profile</h1>|<Display as=\"h1\" className={styles.pageTitle}>Profile</Display>|' web/src/pages/ProfilePage.jsx)"
+      "Bash(sed -i 's|<h1 className={styles.pageTitle}>Profile</h1>|<Display as=\"h1\" className={styles.pageTitle}>Profile</Display>|' web/src/pages/ProfilePage.jsx)",
+      "Bash(node scripts/migrate.js)",
+      "Bash(docker info *)",
+      "Bash(docker context *)",
+      "PowerShell(Get-Process \"Docker Desktop\" -ErrorAction SilentlyContinue)",
+      "Bash(node scripts/dev-verification/verify-step4-pg.js)",
+      "Bash(timeout 8 node index.js)"
     ]
   }
 }

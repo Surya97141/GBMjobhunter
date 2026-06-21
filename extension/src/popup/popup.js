@@ -1,7 +1,6 @@
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const WEB_APP_URL = 'http://localhost:5173';
-const API_BASE    = 'http://localhost:3000';
+// WEB_APP_URL and API_BASE — loaded from src/config.js via <script> in index.html.
 
 // Ring SVG math: r=36, C = 2π × 36 ≈ 226.19
 const RING_C = 2 * Math.PI * 36;

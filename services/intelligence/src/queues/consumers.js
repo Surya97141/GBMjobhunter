@@ -1,7 +1,7 @@
 const { Worker } = require('bullmq');
 const usersDb               = require('../db/users.db');
 const { stripPii }          = require('../services/piiStripping');
-const { insertApplicationEvent, updateOutcomeInClickhouse } = require('../services/clickhouseWriter.service');
+const { insertApplicationEvent, updateApplicationOutcome } = require('../services/clickhouseWriter.service');
 const { publishInsightsForPatterns } = require('../services/insightPublisher.service');
 const { runNightlyComputation }      = require('../services/patternComputation.service');
 const { computeSkillImpactPatterns } = require('../services/skillImpact.service');
@@ -27,7 +27,7 @@ const outcomeUpdatedWorker = new Worker(
   'outcome.updated',
   async (job) => {
     const { applicationId, outcome, responseDays } = job.data;
-    await updateOutcomeInClickhouse(applicationId, outcome, responseDays);
+    await updateApplicationOutcome(applicationId, outcome, responseDays);
     console.log(`[Consumer] outcome.updated processed: ${applicationId}`);
   },
   {
