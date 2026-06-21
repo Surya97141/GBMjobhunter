@@ -176,6 +176,7 @@ async function handleRequestGhostScore(message, sender) {
   // guarantees the popup never stays on "Checking…" indefinitely.
   function reply(data) {
     chrome.tabs.sendMessage(tabId, { type: 'GHOST_SCORE_RESULT', data }).catch(() => {});
+    chrome.runtime.sendMessage({ type: 'GHOST_SCORE_RESULT', data }).catch(() => {});
   }
 
   const { auth_token } = await chrome.storage.local

@@ -105,7 +105,8 @@
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-win3.js)",
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-part3.js)",
       "PowerShell(node d:\\\\GBMjobhunter\\\\scripts\\\\dev-verification\\\\verify-part4.js)",
-      "PowerShell(Start-Process -FilePath \"cmd\" -ArgumentList \"/c\", \"cd /d d:\\\\GBMjobhunter\\\\web && npm run dev > d:\\\\GBMjobhunter\\\\logs-web.txt 2>&1\" -WindowStyle Hidden)"
+      "PowerShell(Start-Process -FilePath \"cmd\" -ArgumentList \"/c\", \"cd /d d:\\\\GBMjobhunter\\\\web && npm run dev > d:\\\\GBMjobhunter\\\\logs-web.txt 2>&1\" -WindowStyle Hidden)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:5173\" -TimeoutSec 3 -UseBasicParsing; \"RUNNING: $\\($r.StatusCode\\)\" } catch { \"NOT RUNNING\" })"
     ]
   }
 }

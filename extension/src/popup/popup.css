@@ -26,6 +26,8 @@
 
 body {
   width: 360px;
+  max-height: 560px;
+  overflow-y: auto;
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.5;

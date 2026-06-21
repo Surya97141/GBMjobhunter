@@ -199,6 +199,17 @@ async function init() {
     return;
   }
 
+  // Populate avatars from cached profile (stored after first autofill)
+  chrome.storage.local.get('user_profile').catch(() => ({})).then(({ user_profile: p }) => {
+    if (!p) return;
+    const i = ((p.firstName?.[0] ?? '') + (p.lastName?.[0] ?? '')).toUpperCase();
+    const initials = i || p.email?.[0]?.toUpperCase() || 'U';
+    ['avatar-idle', 'avatar-job', 'avatar-filling'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = initials;
+    });
+  });
+
   // 2. Ask background for the active tab's page state.
   //    Background asks the content script, which detects forms and extracts job metadata.
   chrome.runtime.sendMessage({ type: 'GET_PAGE_STATE' }, (pageState) => {
@@ -244,6 +255,9 @@ chrome.runtime && chrome.runtime.onMessage?.addListener((message) => {
     }
     // Return to job state after auto-fill completes
     showState('job');
+  }
+  if (message.type === 'GHOST_SCORE_RESULT') {
+    populateGhostScore(message.data);
   }
 });
 

@@ -38,8 +38,8 @@
  */
 .card {
   background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: 12px;
+  border: none;
+  border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-card);
   transition: box-shadow var(--duration-base) var(--ease-base),
@@ -49,7 +49,6 @@
 
 .card:hover {
   box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
 }
 
 /* ─── CARD — obsidian glassmorphism override ──────────────────────────────── */
@@ -64,15 +63,24 @@
  */
 :global([data-theme="obsidian"]) .card {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 24px rgba(167, 139, 250, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  transition: border-color var(--duration-fast) var(--ease-base),
+              transform    var(--duration-fast) var(--ease-base);
 }
 
 :global([data-theme="obsidian"]) .card:hover {
-  box-shadow: 0 8px 32px rgba(167, 139, 250, 0.18);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(167, 139, 250, 0.40);
+}
+
+/* Fallback: backdrop-filter unsupported (Firefox < 103, some mobile browsers) */
+@supports not (backdrop-filter: blur(1px)) {
+  :global([data-theme="obsidian"]) .card {
+    background: rgba(20, 20, 25, 0.40);
+  }
 }
 
 /* ─── CARD INTERNALS ───────────────────────────────────────────────────────── */

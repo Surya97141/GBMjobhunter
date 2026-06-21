@@ -92,6 +92,7 @@ export default function InsightCards() {
                 key={insight.id}
                 className={`${styles.card} ${insight.seen ? styles.cardSeen : ''}`}
                 variants={cardVariants}
+                whileHover={{ y: -2 }}
               >
                 <div className={styles.cardTop}>
                   <span className={styles.category}>{meta.label}</span>
