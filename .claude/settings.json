@@ -118,7 +118,13 @@
       "Bash(docker context *)",
       "PowerShell(Get-Process \"Docker Desktop\" -ErrorAction SilentlyContinue)",
       "Bash(node scripts/dev-verification/verify-step4-pg.js)",
-      "Bash(timeout 8 node index.js)"
+      "Bash(timeout 8 node index.js)",
+      "Bash(ls docker-compose.yml .env.production Caddyfile)",
+      "Bash(ls gateway/Dockerfile services/user/Dockerfile services/jobs/Dockerfile services/opportunity/Dockerfile services/intelligence/Dockerfile services/agent/Dockerfile)",
+      "Bash(ls scripts/setup-vps.sh scripts/deploy.sh)",
+      "Bash(xargs cat)",
+      "Bash(cd d:\\\\\\\\GBMjobhunter)",
+      "Bash(find d:\\\\\\\\GBMjobhunter -not -path \"*/node_modules/*\" -type f \\\\\\( -name \"*.test.js\" -o -name \"*.spec.js\" -o -name \"*.e2e.js\" \\\\\\))"
     ]
   }
 }
