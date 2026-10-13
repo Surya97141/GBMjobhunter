@@ -6,7 +6,6 @@ if (!process.env.REDIS_URL)    throw new Error('REDIS_URL env var is required');
 const express = require('express');
 const applicationRoutes = require('./src/routes/applications.routes');
 const jobRoutes         = require('./src/routes/jobs.routes');
-
 const app = express();
 app.use(express.json());
 
