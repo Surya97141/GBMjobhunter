@@ -10,7 +10,7 @@
     "services/agent",
     "web",
     "mobile",
-    "shared"
+    "shared" 
   ],
   "scripts": {
     "dev": "docker-compose up -d",
