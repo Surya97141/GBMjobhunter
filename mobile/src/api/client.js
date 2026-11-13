@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from '../utils/storage';
 
-// EXPO_PUBLIC_API_URL is set at build time for production releases.
+// EXPO_PUBLIC_API_URL was meant for the build time only
 // For local dev on a simulator, localhost works. On a physical device,
 // set EXPO_PUBLIC_API_URL to your machine's LAN IP or the deployed gateway URL.
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
