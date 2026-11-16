@@ -16,7 +16,7 @@ const app = express();
 // ── Security headers ────────────────────────────────────────────────────────
 // helmet sets X-Content-Type-Options, X-Frame-Options, Referrer-Policy, etc.
 // CSP is disabled because this is a JSON API server — no HTML is served.
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({ contentSecurityPolicy:false }));
 
 // ── CORS ────────────────────────────────────────────────────────────────────
 // Allowed origins: web app dev server, any Chrome extension, and any origin
@@ -28,7 +28,8 @@ app.use(cors({
   origin(origin, cb) {
     if (!origin) return cb(null, true);                              // no-origin: allowed
     if (origin.startsWith('chrome-extension://')) return cb(null, true); // extension: allowed
-    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);    // listed: allowed
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);   
+    // listed: allowed
     cb(new Error(`Origin ${origin} not allowed by CORS`));
   },
   credentials: true,
