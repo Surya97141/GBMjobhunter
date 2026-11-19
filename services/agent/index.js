@@ -1,5 +1,7 @@
 require('dotenv').config();
-
+//ohk so this script is about the various utilities provided to various agents tier wise... and the task was distributed in a 
+//way that works the best for each of the LLM models... i.e cover letter is given to OPEN AI and outreach drafting is given to claude..
+//this was purely in tution based ... thaet when it comes to text based things.. and convo. centric info gpt rocks!!
 if (!process.env.REDIS_URL) throw new Error('REDIS_URL env var is required');
 
 const express     = require('express');
