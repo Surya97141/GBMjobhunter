@@ -64,5 +64,4 @@ async function updateOutcome(applicationId, userId, outcome, responseDays) {
 
   return application;
 }
-
 module.exports = { logApplication, getUserApplications, getApplicationStats, updateOutcome };
