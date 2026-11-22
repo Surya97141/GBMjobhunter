@@ -55,7 +55,6 @@ async function updateOutcome(applicationId, userId, outcome, responseDays) {
     err.statusCode = 404;
     throw err;
   }
-
   await publishOutcomeUpdated({
     applicationId:      application.id,
     anonymisedCohortId: application.jd_fingerprint_hash,
