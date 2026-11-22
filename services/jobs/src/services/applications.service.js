@@ -5,7 +5,6 @@ const applicationsDb           = require('../db/applications.db');
 const companiesDb              = require('../db/companies.db');
 const usersDb                  = require('../db/users.db');
 const { publishApplicationLogged, publishOutcomeUpdated } = require('../queues/producer');
-
 async function logApplication(userId, { companyName, roleTitle, jdText, pageUrl }) {
   const resumeJson = await usersDb.getResumeByUserId(userId);
   const atsScore   = resumeJson ? scoreResumeAgainstJD(resumeJson, jdText) : null;
