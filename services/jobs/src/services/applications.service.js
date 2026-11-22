@@ -22,7 +22,6 @@ async function logApplication(userId, { companyName, roleTitle, jdText, pageUrl 
     jdFingerprintHash: hash,
     atsScoreAtApply:   atsScore,
   });
-
   await publishApplicationLogged({
     applicationId:    application.id,
     userId,
