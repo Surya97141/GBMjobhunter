@@ -1,5 +1,7 @@
 # GBMjobhunter
 
+[![CI](https://github.com/Surya97141/GBMjobhunter/actions/workflows/ci.yml/badge.svg)](https://github.com/Surya97141/GBMjobhunter/actions/workflows/ci.yml)
+
 A job-search intelligence platform. It does three things:
 
 1. **Tracks applications** on a Kanban board (saved → applied → interview → offer / ghosted / rejected).
@@ -81,7 +83,7 @@ npm run build # production build of the web app
 
 CI (`.github/workflows/ci.yml`) runs both on every push to `main` and on pull requests.
 
-Current coverage is limited to user auth (10 tests) and job applications (9 tests). The gateway, intelligence worker and agent service are untested so far.
+Current coverage: gateway (24 tests: JWT enforcement, routing, header spoofing, CORS, upstream failures), user auth (10) and job applications (9). The intelligence worker, agent service and opportunity service are untested so far.
 
 ## Further reading
 
