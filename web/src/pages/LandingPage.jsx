@@ -1,4 +1,5 @@
-import { useEffect, useRef, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import NET from 'vanta/dist/vanta.net.min';
@@ -14,6 +15,26 @@ export default function LandingPage() {
   const navigate    = useNavigate();
   const sectionRef  = useRef(null);
   const vantaEffect = useRef(null);
+  const { startDemo } = useAuth();
+  const [demoState, setDemoState] = useState('idle'); // idle | loading | error
+  const [demoError, setDemoError] = useState('');
+
+  async function handleTryDemo() {
+    setDemoState('loading');
+    setDemoError('');
+    try {
+      await startDemo();
+      navigate('/dashboard');
+    } catch (err) {
+      const status = err.response?.status;
+      setDemoState('error');
+      setDemoError(
+        status === 429 ? 'Too many demo sessions from your network. Try again in an hour.'
+        : status === 404 ? 'The live demo is not enabled on this deployment.'
+        : 'Could not start the demo. Please try again in a moment.'
+      );
+    }
+  }
 
   useEffect(() => {
     if (!vantaEffect.current && sectionRef.current) {
@@ -60,7 +81,21 @@ export default function LandingPage() {
             <div className={styles.ctaGroup}>
               <button type="button" aria-label="Get started — create your account" className={styles.ctaFilled} onClick={() => navigate('/register')}>Get Started</button>
               <button type="button" aria-label="Sign in to your account"           className={styles.ctaGhost}  onClick={() => navigate('/login')}>Sign In</button>
+              <button
+                type="button"
+                aria-label="Try the demo with sample data, no sign-up needed"
+                className={styles.ctaDemo}
+                onClick={handleTryDemo}
+                disabled={demoState === 'loading'}
+              >
+                {demoState === 'loading' ? 'Starting demo…' : 'Try the demo'}
+              </button>
             </div>
+            <p className={styles.demoNote} role={demoState === 'error' ? 'alert' : undefined}>
+              {demoState === 'error'
+                ? demoError
+                : 'No sign-up needed. The demo uses synthetic sample data.'}
+            </p>
           </div>
 
           <div className={styles.heroRight}>

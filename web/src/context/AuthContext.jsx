@@ -57,6 +57,17 @@ export function AuthProvider({ children }) {
     return u;
   }
 
+  // Starts a throwaway demo session: the server creates a fresh account
+  // pre-loaded with sample data, so there are no credentials to enter.
+  // The extension relay is skipped on purpose: a demo token should not
+  // replace a real session stored in someone's installed extension.
+  async function startDemo() {
+    const res = await client.post('/auth/demo');
+    const { user: u, token: t } = res.data.data;
+    _save(t, u);
+    return u;
+  }
+
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
@@ -64,7 +75,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, startDemo, logout }}>
       {children}
     </AuthContext.Provider>
   );

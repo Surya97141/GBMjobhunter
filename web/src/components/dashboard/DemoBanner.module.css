@@ -1,0 +1,65 @@
+.banner {
+  background: var(--accent-subtle);
+  border-bottom: 1px solid var(--accent);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px 24px;
+  font-size: 0.8125rem;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--text-inverse);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.text {
+  flex: 1 1 280px;
+  color: var(--text-secondary);
+}
+
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link:hover { color: var(--accent-hover); }
+
+.guide {
+  padding: 4px 24px 18px;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.heading {
+  margin: 14px 0 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.steps,
+.status {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.guide strong { color: var(--text-primary); }

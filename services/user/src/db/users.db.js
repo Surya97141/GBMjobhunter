@@ -13,7 +13,7 @@ async function findUserById(id) {
     `SELECT
        id, email, name, ats_score_cache,
        target_role, target_location,
-       years_of_experience, cover_letter_template, created_at
+       years_of_experience, cover_letter_template, created_at, is_demo
      FROM users
      WHERE id = $1`,
     [id]

@@ -89,6 +89,30 @@
   border: 2px solid var(--border-strong);
 }
 
+.ctaDemo {
+  padding: 14px 32px;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  transition: opacity var(--duration-fast) var(--ease-base);
+}
+
+.ctaDemo:hover:not(:disabled) { opacity: 0.82; }
+.ctaDemo:disabled { opacity: 0.6; cursor: progress; }
+
+.demoNote {
+  margin-top: 12px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
 /* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 1024px) {
