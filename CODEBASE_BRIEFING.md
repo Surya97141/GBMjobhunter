@@ -56,7 +56,7 @@ GBMjobhunter/
 │   └── setup-vps.sh         One-time VPS setup script
 ├── docker-compose.yml       Production Docker Compose (all 6 services + postgres + redis)
 ├── Caddyfile                Caddy config — HTTPS, static serve, /api/* proxy
-├── .env.production          Secrets template (safe to commit, blanks filled on VPS)
+├── .env.production.example  Env template (secrets blank). On the VPS: cp to .env and fill in. The real .env.production/.env is gitignored.
 └── package.json             Workspace root — npm run backend / npm run web
 ```
 
@@ -393,7 +393,7 @@ Docker (internal gbm-network):
 **Files produced (all committed in repo):**
 - `docker-compose.yml` — all 8 containers, `gbm-network`, named volumes, health checks
 - `gateway/Dockerfile`, `services/*/Dockerfile` — 6 Dockerfiles, all `CMD ["node", "index.js"]`
-- `.env.production` — template with non-secret defaults filled in, secrets blank
+- `.env.production.example` — template with non-secret defaults filled in, secrets blank (tracked). Real `.env.*` files are gitignored.
 - `Caddyfile` — HTTPS, SPA fallback (`try_files {path} /index.html`), `/api/*` proxy
 - `scripts/setup-vps.sh` — Docker + Caddy + Node 20 + UFW install
 - `scripts/deploy.sh` — git pull + `npm run build` + `docker compose up -d --build` + migrate + Caddy reload
@@ -401,7 +401,7 @@ Docker (internal gbm-network):
 **IMPORTANT before first deploy:**
 1. Create `.dockerignore` in each of the 6 service directories containing `node_modules` and `.env` — without this, Windows-compiled native modules (bcrypt) will be copied into Linux containers and crash
 2. Edit `Caddyfile` — replace `your-domain.com` with the real domain
-3. Copy `.env.production` to `.env` on the VPS and fill in 5 secrets: `POSTGRES_PASSWORD`, `JWT_SECRET`, `ALLOWED_ORIGINS` (your domain URL), `TIER2_API_KEY`, `TIER3_API_KEY`
+3. Copy `.env.production.example` to `.env` on the VPS and fill in 5 secrets: `POSTGRES_PASSWORD`, `JWT_SECRET`, `ALLOWED_ORIGINS` (your domain URL), `TIER2_API_KEY`, `TIER3_API_KEY`
 
 ---
 
@@ -456,3 +456,18 @@ Local `.env` files in each service directory (not committed).
 4. **Root `package.json` scripts** — `setup:clickhouse` script and `@clickhouse/client` devDependency still reference the old ClickHouse setup. These can be cleaned up (the service itself no longer uses ClickHouse; only the root-level dev tooling references it)
 
 5. **SSL/TLS first boot** — Caddy will attempt to obtain a Let's Encrypt certificate on first start. DNS A record must point to the VPS IP **before** starting Caddy, or the ACME challenge will fail and Caddy will fall back to HTTP
+
+---
+
+## 21. Testing and CI
+
+- **Run everything:** `npm test` (runs each workspace's Jest suite, `--passWithNoTests`) and `npm run build` (web production build).
+- **CI:** `.github/workflows/ci.yml` runs `npm ci`, `npm test` and `npm run build` on pushes to `main` and on pull requests. `npm ci` fails if `package-lock.json` is out of sync with any workspace manifest, so run `npm install` after adding a dependency or workspace.
+- **Approach:** Jest + Supertest, with Postgres, Redis, BullMQ and axios mocked. No containers are needed, but the tests do not exercise real SQL.
+- **Coverage:**
+  - `gateway` (24): JWT enforcement, routing to each upstream, `x-user-id` spoof protection, 502 on upstream failure, CORS.
+  - `services/intelligence` (21): PII stripping allow-list, idempotent `ON CONFLICT DO NOTHING` event insert, 50-cohort minimum, 90-day window, pattern upserts.
+  - `services/user` (10): register/login/profile.
+  - `services/jobs` (9): application create/list/outcome. `jdText` is optional by design (the extension sends `''` when no JD is scraped).
+  - Untested: `services/agent`, `services/opportunity`, web, mobile, extension.
+- **Trust model:** the user service re-verifies the JWT itself; the jobs, opportunity and agent services trust the gateway's `x-user-id` header. This is safe only because Docker Compose publishes no port for those services. Do not add `ports:` to them.
