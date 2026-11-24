@@ -10,7 +10,7 @@
     "services/agent",
     "web",
     "mobile",
-    "shared" 
+    "shared"
   ],
   "scripts": {
     "dev": "docker-compose up -d",
@@ -18,14 +18,20 @@
     "setup:clickhouse": "node scripts/setup-clickhouse.js",
     "backend": "concurrently -n gateway,user,jobs,opportunity,intel,agent -c cyan,green,yellow,blue,magenta,white \"npm run dev --workspace=@gbm/gateway\" \"npm run dev --workspace=@gbm/user-service\" \"npm run dev --workspace=@gbm/jobs-service\" \"npm run dev --workspace=@gbm/opportunity-service\" \"npm run dev --workspace=@gbm/intelligence-service\" \"npm run dev --workspace=@gbm/agent-service\"",
     "web": "npm run dev --workspace=@gbm/web",
+    "lint": "eslint .",
     "test": "npm test --workspaces --if-present -- --passWithNoTests",
     "build": "npm run build --workspace=@gbm/web"
   },
   "devDependencies": {
     "@clickhouse/client": "^0.2.0",
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.61.0",
     "concurrently": "^10.0.3",
     "dotenv": "^16.0.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
     "pg": "^8.11.0",
     "playwright": "^1.61.0"
   }

@@ -18,6 +18,9 @@ jobs:
 
       - run: npm ci
 
+      # Fails on errors only; warnings (e.g. unused variables) are reported but allowed.
+      - run: npm run lint
+
       # Service tests mock Postgres and Redis, so no service containers needed.
       - run: npm test
 
