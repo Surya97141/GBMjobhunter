@@ -471,3 +471,14 @@ Local `.env` files in each service directory (not committed).
   - `services/jobs` (9): application create/list/outcome. `jdText` is optional by design (the extension sends `''` when no JD is scraped).
   - Untested: `services/agent`, `services/opportunity`, web, mobile, extension.
 - **Trust model:** the user service re-verifies the JWT itself; the jobs, opportunity and agent services trust the gateway's `x-user-id` header. This is safe only because Docker Compose publishes no port for those services. Do not add `ports:` to them.
+
+---
+
+## 22. Demo mode and hosted demo
+
+- **Demo accounts:** `POST /auth/demo` (user service, public, gateway limit 10/hour/IP) creates a throwaway user (`is_demo = true`, migration 013) with 10 sample applications covering every tracker column and 2 synthetic insights. It returns 404 unless `DEMO_MODE_ENABLED=true`. Sample data lives in `services/user/src/demo/demoData.js`. Synthetic cohort patterns use `role_bucket` values prefixed `demo_` so they never collide with real pipeline output.
+- **Cleanup:** demo users older than 4 hours are deleted at the start of each new demo signup (not on a timer, since free hosts sleep idle processes). `applications` and `user_insights` cascade from `users`.
+- **Isolation:** demo edits publish normal BullMQ events, so a demo must use its own database, never production.
+- **Web:** the landing page "Try the demo" button calls `startDemo()` in `AuthContext`; `DemoBanner` shows a banner and guide for `is_demo` users; `/users/me` returns `is_demo`.
+- **Hosting:** web on Vercel (`vercel.json`), backend on Render's free tier (`render.yaml`). `scripts/demo-start.js` runs migrations, seeds `skill_demand`, then runs gateway, user, jobs, opportunity and the intelligence worker in one container. If any child exits, the launcher exits so the host restarts everything. Full steps: `docs/DEMO_DEPLOY.md`.
+- **Gateway:** `trust proxy` is set (`TRUST_PROXY`, default 1) so per-IP rate limits see real client IPs behind Caddy or a PaaS router.

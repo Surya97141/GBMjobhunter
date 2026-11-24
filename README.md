@@ -8,6 +8,23 @@ A job-search intelligence platform. It does three things:
 2. **Turns anonymised cohort data into insights.** A nightly pipeline computes ghost rates, rejection rates and ATS scores per skill cluster and role bucket, then surfaces personalised cards on the dashboard.
 3. **Auto-fills job applications** through a Chrome extension that detects ATS forms (Greenhouse, Lever, Workday, ...) and fills them from the user's profile and parsed resume.
 
+## Live demo
+
+> **Demo link:** _added after the first deployment_. Setup is in [docs/DEMO_DEPLOY.md](docs/DEMO_DEPLOY.md).
+
+Click **Try the demo** on the landing page. No sign-up: you get a throwaway account pre-loaded with
+**synthetic sample data**. You can drag applications between tracker columns and watch the dashboard update.
+Demo accounts are deleted automatically a few hours after they are created, and the demo runs on an isolated database.
+
+| Feature | In the demo |
+|---|---|
+| Application tracker, dashboard, profile | **Live**, backed by the real API gateway and database |
+| Insight cards and insights map | **Sample data**, seeded rather than computed from real applicants |
+| Event pipeline (BullMQ worker) | **Live**: new applications and outcome changes flow through the worker |
+| Opportunities | Curated static data |
+| AI features (resume parsing, cover letters) | **Not enabled** in the demo (no provider keys) |
+| Chrome extension, mobile app | **Separate install**, not part of the hosted demo |
+
 ## Architecture
 
 ```

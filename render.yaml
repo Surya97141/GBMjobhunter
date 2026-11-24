@@ -1,0 +1,51 @@
+# Render Blueprint for the hosted demo backend (free tier).
+# The frontend is deployed separately on Vercel (see vercel.json).
+# Setup steps: docs/DEMO_DEPLOY.md
+
+databases:
+  - name: gbm-demo-db
+    plan: free
+    databaseName: gbm_demo
+    user: gbm
+
+services:
+  # Redis-compatible store for BullMQ and the gateway's rate limiter.
+  - type: keyvalue
+    name: gbm-demo-redis
+    plan: free
+    ipAllowList: []            # internal connections only
+    maxmemoryPolicy: noeviction # BullMQ needs this: eviction would silently drop queued jobs
+
+  # One service runs the gateway plus every backend process (scripts/demo-start.js).
+  - type: web
+    name: gbm-demo-api
+    runtime: node
+    plan: free
+    # Install only the backend workspaces: skips the web app and the React Native deps.
+    buildCommand: >-
+      npm ci --omit=dev
+      --workspace=@gbm/gateway
+      --workspace=@gbm/user-service
+      --workspace=@gbm/jobs-service
+      --workspace=@gbm/opportunity-service
+      --workspace=@gbm/intelligence-service
+      --workspace=@gbm/agent-service
+    startCommand: node scripts/demo-start.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gbm-demo-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: gbm-demo-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      # Set in the Render dashboard to your Vercel URL, e.g. https://gbm-demo.vercel.app
+      - key: ALLOWED_ORIGINS
+        sync: false
