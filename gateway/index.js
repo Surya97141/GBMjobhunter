@@ -13,6 +13,12 @@ const proxyRoutes = require('./src/routes/proxy.routes');
 
 const app = express();
 
+// The gateway runs behind a reverse proxy (Caddy, or a PaaS router). Without
+// this, req.ip is the proxy's address for every request, so per-IP rate limits
+// would put all visitors into one shared bucket. TRUST_PROXY is the number of
+// proxy hops to trust (default 1); set 0 if the gateway is exposed directly.
+app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 1));
+
 // ── Security headers ────────────────────────────────────────────────────────
 // helmet sets X-Content-Type-Options, X-Frame-Options, Referrer-Policy, etc.
 // CSP is disabled because this is a JSON API server — no HTML is served.

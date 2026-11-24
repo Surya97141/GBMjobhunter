@@ -16,7 +16,7 @@ const axios   = require('axios');
 // Rate limiting itself is express-rate-limit's job; we test our routing here.
 jest.mock('../middleware/rateLimiter.middleware', () => {
   const pass = (_req, _res, next) => next();
-  return { standardLimiter: pass, resumeUploadLimiter: pass };
+  return { standardLimiter: pass, resumeUploadLimiter: pass, demoLimiter: pass };
 });
 jest.mock('../utils/redis', () => ({}));
 
@@ -143,6 +143,17 @@ describe('Public auth routes', () => {
     expect(call.url).toBe('http://user.test/auth/login');
     expect(call.method).toBe('POST');
     expect(call.data).toEqual({ email: 'a@b.com', password: 'x' });
+  });
+});
+
+describe('Demo signup route', () => {
+  it('forwards POST /auth/demo to the user service without a token', async () => {
+    axios.mockResolvedValue({ status: 201, data: { status: 'success', data: { token: 't' } } });
+
+    const res = await request(app).post('/auth/demo');
+
+    expect(res.status).toBe(201);
+    expect(axios.mock.calls[0][0].url).toBe('http://user.test/auth/demo');
   });
 });
 

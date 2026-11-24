@@ -43,4 +43,23 @@ const resumeUploadLimiter = rateLimit({
   },
 });
 
-module.exports = { standardLimiter, resumeUploadLimiter };
+// Each call creates a user plus sample rows in the database, so the public
+// demo endpoint gets a much tighter, per-IP limit than ordinary routes.
+const demoLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: makeKeyGenerator('rl:demo'),
+  store: new RedisStore({
+    sendCommand: (...args) => redisClient.sendCommand(args),
+  }),
+  handler: (req, res) => {
+    res.status(429).json({
+      status: 'error',
+      message: 'Too many demo sessions from this network. Try again in an hour.',
+    });
+  },
+});
+
+module.exports = { standardLimiter, resumeUploadLimiter, demoLimiter };

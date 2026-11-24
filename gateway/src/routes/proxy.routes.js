@@ -2,7 +2,7 @@ const axios  = require('axios');
 const http   = require('http');
 const { Router } = require('express');
 const { requireAuth } = require('../middleware/auth.middleware');
-const { standardLimiter, resumeUploadLimiter } = require('../middleware/rateLimiter.middleware');
+const { standardLimiter, resumeUploadLimiter, demoLimiter } = require('../middleware/rateLimiter.middleware');
 
 const router = Router();
 
@@ -75,6 +75,10 @@ function streamForward(baseUrl) {
     req.pipe(proxyReq);
   };
 }
+
+// ── Public demo signup — registered before the generic /auth route so it gets
+// its own stricter limiter. The user service returns 404 unless demo mode is on.
+router.post('/auth/demo', demoLimiter, forward(process.env.USER_SERVICE_URL));
 
 // ── Public auth routes (no JWT required) ─────────────────────────────────────
 router.use('/auth', standardLimiter, forward(process.env.USER_SERVICE_URL));
