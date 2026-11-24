@@ -50,7 +50,13 @@ app.use((_req, res) => {
 });
 
 // ── Start ───────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Gateway running on port ${PORT}`);
-});
+// Export the app so Supertest can require() it without calling listen().
+// The server only starts when this file is the entry point.
+module.exports = app;
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Gateway running on port ${PORT}`);
+  });
+}
