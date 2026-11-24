@@ -74,13 +74,22 @@ describe('POST /applications', () => {
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when jdText is shorter than 10 characters', async () => {
+  // jdText is optional by design: the extension logs applications even when no
+  // job description could be scraped (it sends '' in that case).
+  it('returns 201 when jdText is omitted', async () => {
+    usersDb.getResumeByUserId.mockResolvedValue(null);
+    companiesDb.findOrCreateCompany.mockResolvedValue({ id: 'company-uuid-1', name: 'Stripe' });
+    applicationsDb.createApplication.mockResolvedValue({
+      id: 'app-uuid-2', user_id: 'user-uuid-1', company_id: 'company-uuid-1',
+      role_title: 'Engineer', outcome: 'pending', applied_at: new Date().toISOString(),
+    });
+
     const res = await request(app)
       .post('/applications')
       .set(AUTH_HEADER)
-      .send({ companyName: 'Stripe', roleTitle: 'Engineer', jdText: 'short' });
+      .send({ companyName: 'Stripe', roleTitle: 'Engineer' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(201);
   });
 
   it('returns 400 when body is empty', async () => {

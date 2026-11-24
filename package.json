@@ -17,7 +17,9 @@
     "migrate": "node scripts/migrate.js",
     "setup:clickhouse": "node scripts/setup-clickhouse.js",
     "backend": "concurrently -n gateway,user,jobs,opportunity,intel,agent -c cyan,green,yellow,blue,magenta,white \"npm run dev --workspace=@gbm/gateway\" \"npm run dev --workspace=@gbm/user-service\" \"npm run dev --workspace=@gbm/jobs-service\" \"npm run dev --workspace=@gbm/opportunity-service\" \"npm run dev --workspace=@gbm/intelligence-service\" \"npm run dev --workspace=@gbm/agent-service\"",
-    "web": "npm run dev --workspace=@gbm/web"
+    "web": "npm run dev --workspace=@gbm/web",
+    "test": "npm test --workspaces --if-present -- --passWithNoTests",
+    "build": "npm run build --workspace=@gbm/web"
   },
   "devDependencies": {
     "@clickhouse/client": "^0.2.0",
