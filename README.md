@@ -83,7 +83,7 @@ npm run build # production build of the web app
 
 CI (`.github/workflows/ci.yml`) runs both on every push to `main` and on pull requests.
 
-Current coverage: gateway (24 tests: JWT enforcement, routing, header spoofing, CORS, upstream failures), user auth (10) and job applications (9). The intelligence worker, agent service and opportunity service are untested so far.
+Current coverage: gateway (24 tests: JWT enforcement, routing, header spoofing, CORS, upstream failures), intelligence pipeline (21: PII stripping, idempotent event inserts, cohort-size threshold, pattern upserts), user auth (10) and job applications (9). The agent and opportunity services are untested so far.
 
 ## Further reading
 
