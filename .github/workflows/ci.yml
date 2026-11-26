@@ -24,4 +24,8 @@ jobs:
       # Service tests mock Postgres and Redis, so no service containers needed.
       - run: npm test
 
+      # The extension is not an npm workspace, so `npm test` above skips it.
+      # Its tests use node:test only, so no install step is needed.
+      - run: npm --prefix extension test
+
       - run: npm run build
