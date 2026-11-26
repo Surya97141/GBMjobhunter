@@ -62,7 +62,11 @@ export function AuthProvider({ children }) {
   // The extension relay is skipped on purpose: a demo token should not
   // replace a real session stored in someone's installed extension.
   async function startDemo() {
-    const res = await client.post('/auth/demo');
+    // Wake a sleeping free-tier backend first (can take about a minute).
+    // /health is idempotent and not rate limited, so a long wait is safe here;
+    // the account-creating POST below keeps a normal timeout and is never retried.
+    await client.get('/health', { timeout: 90_000 });
+    const res = await client.post('/auth/demo', null, { timeout: 20_000 });
     const { user: u, token: t } = res.data.data;
     _save(t, u);
     return u;
