@@ -20,3 +20,9 @@
 
 const API_BASE    = 'http://localhost:3000';
 const WEB_APP_URL = 'http://localhost:5173';
+
+// Origins allowed to hand the extension a login token (GBM_SET_TOKEN).
+// Derived from WEB_APP_URL so swapping that value above is enough. Checked by
+// the content script (event.origin) and again by the background worker
+// (browser-supplied sender origin), so an arbitrary page cannot plant a token.
+const TRUSTED_WEB_APP_ORIGINS = [new URL(WEB_APP_URL).origin];

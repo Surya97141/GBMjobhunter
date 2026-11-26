@@ -406,6 +406,7 @@ function refreshPageState() {
     isJobPage:         true,
     company:           currentMeta.company,
     role:              currentMeta.role,
+    url:               window.location.href,
     jdText,
     jdFingerprintHash: currentJdFingerprint,  // null on very first call; hash on all subsequent
     ghostScore:        currentGhostScore,      // null until background responds
@@ -441,16 +442,19 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 // ─── TOKEN HANDOFF RELAY ──────────────────────────────────────────────────────
 
-// When the content script is injected into the web app (localhost:5173), the web
+// When the content script is injected into the web app (WEB_APP_URL), the web
 // app calls window.postMessage({ type: 'GBM_SET_TOKEN', token }) after login.
 // This listener catches that message and forwards it to the background service
 // worker, which stores it in chrome.storage.local.
-// On production job-board pages this listener is a no-op — messages of type
-// 'GBM_SET_TOKEN' will never originate there.
+// This script also runs on every https page, and any script on such a page can
+// post a message to its own window, so the relay is limited to the trusted web
+// app origin(s). The background worker checks the sender's origin again.
 window.addEventListener('message', (event) => {
   if (event.source !== window) return;
-  if (event.data?.type === 'GBM_SET_TOKEN' && event.data?.token) {
-    chrome.runtime.sendMessage({ type: 'GBM_SET_TOKEN', token: event.data.token });
+  if (!TRUSTED_WEB_APP_ORIGINS.includes(event.origin)) return;
+  const token = event.data?.token;
+  if (event.data?.type === 'GBM_SET_TOKEN' && typeof token === 'string' && token) {
+    chrome.runtime.sendMessage({ type: 'GBM_SET_TOKEN', token });
   }
 });
 
