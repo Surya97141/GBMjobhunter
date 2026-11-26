@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "web-ext run",
-    "build": "web-ext build"
+    "build": "web-ext build",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "webextension-polyfill": "^0.10.0"

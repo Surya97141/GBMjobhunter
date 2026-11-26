@@ -75,7 +75,7 @@ module.exports = [
       ecmaVersion: 2022,
       globals: {
         ...globals.browser, ...globals.webextensions, ...globals.serviceworker,
-        API_BASE: 'readonly', WEB_APP_URL: 'readonly',
+        API_BASE: 'readonly', WEB_APP_URL: 'readonly', TRUSTED_WEB_APP_ORIGINS: 'readonly',
       },
     },
     rules: { 'no-unused-vars': unusedVars },
@@ -83,8 +83,13 @@ module.exports = [
   // config.js is the one place those globals are defined (and "unused" in-file).
   {
     files: ['extension/src/config.js'],
-    languageOptions: { globals: { API_BASE: 'off', WEB_APP_URL: 'off' } },
+    languageOptions: { globals: { API_BASE: 'off', WEB_APP_URL: 'off', TRUSTED_WEB_APP_ORIGINS: 'off' } },
     rules: { 'no-unused-vars': 'off' },
+  },
+  // Extension tests run in Node (node:test), loading the extension scripts in a vm.
+  {
+    files: ['extension/test/**/*.js'],
+    languageOptions: { sourceType: 'commonjs', globals: { ...globals.node } },
   },
 
   // Repo-wide tweaks to recommended rules.

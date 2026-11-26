@@ -60,6 +60,36 @@ async function fetchAndCacheProfile(token) {
   }
 }
 
+// ─── SENDER / INPUT HELPERS ───────────────────────────────────────────────────
+
+// True only for a message from this extension's own content script, running in
+// the top frame of a tab whose origin is in TRUSTED_WEB_APP_ORIGINS. The origin
+// comes from the browser (sender.origin, or sender.url where origin is not
+// provided), so a page cannot fake it.
+function isTrustedTokenSender(sender) {
+  if (!sender || sender.id !== chrome.runtime.id) return false;
+  if (!sender.tab || sender.frameId !== 0) return false;
+
+  let origin = sender.origin;
+  if (!origin) {
+    try { origin = new URL(sender.url).origin; } catch { return false; }
+  }
+  return TRUSTED_WEB_APP_ORIGINS.includes(origin);
+}
+
+// Returns an http(s) URL string the applications API will accept, or undefined
+// when the page URL is missing or unusable (pageUrl is optional on the API, but
+// an empty string fails its URL validation).
+function toPageUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return undefined;
+  try {
+    const url = new URL(value.trim());
+    return (url.protocol === 'http:' || url.protocol === 'https:') ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // ─── MAIN MESSAGE ROUTER ──────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -78,9 +108,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
 
     // Token handoff: web app content script relays the JWT here after login.
+    // Only accepted from our own content script running in the top frame of a
+    // trusted web app origin (see isTrustedTokenSender).
     // Clear the cached profile so the next autofill fetches fresh data.
     case 'GBM_SET_TOKEN':
-      if (message.token) {
+      if (isTrustedTokenSender(sender) && typeof message.token === 'string' && message.token) {
         chrome.storage.local.set({
           [STORAGE_KEY_TOKEN]:      message.token,
           [STORAGE_KEY_PROFILE]:    null,
@@ -228,10 +260,11 @@ async function handleLogApplication(data, sendResponse) {
         'Authorization': `Bearer ${auth_token}`,
       },
       body: JSON.stringify({
-        companyName: data.company  ?? '',
-        roleTitle:   data.role     ?? '',
-        jdText:      data.jdText   ?? '',
-        pageUrl:     data.url      ?? '',
+        companyName: data?.company ?? '',
+        roleTitle:   data?.role    ?? '',
+        jdText:      data?.jdText  ?? '',
+        // undefined is dropped by JSON.stringify, so a missing URL is omitted.
+        pageUrl:     toPageUrl(data?.url),
       }),
     });
 

@@ -5,6 +5,7 @@ require('dotenv').config();
 if (!process.env.REDIS_URL) throw new Error('REDIS_URL env var is required');
 
 const express     = require('express');
+const { z }       = require('zod');
 const { callModel } = require('./src/services/modelRouter.service');
 const { getCompanySignals, getUserSkills } = require('./src/db/lookup.db');
 
@@ -12,6 +13,26 @@ const app    = express();
 const router = express.Router();
 
 app.use(express.json());
+
+// Express 4 does not catch rejected promises from async handlers; forward them
+// to the error handler at the bottom so the process never sees an unhandled
+// rejection and the client gets a generic 500.
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// Optional free-text fields: the clients send '' (or leave them out) when empty;
+// anything that is not a string is rejected rather than crashing on .slice().
+const optionalText = z.string().nullish();
+
+// Parses req.body with `schema`. On failure, sends the route's usual 400 body
+// (plus the zod issues) and returns null.
+function parseBody(schema, req, res, message) {
+  const result = schema.safeParse(req.body ?? {});
+  if (!result.success) {
+    res.status(400).json({ status: 'error', message, errors: result.error.errors });
+    return null;
+  }
+  return result.data;
+}
 
 // ── Health — tier configuration check ────────────────────────────────────────
 router.get('/health', (_req, res) => {
@@ -48,12 +69,16 @@ router.get('/health', (_req, res) => {
 // Calls Tier 2 (OpenAI-compatible) with a real prompt instructing a 3-paragraph,
 // non-generic letter. modelRouter result passes straight through — callers receive
 // { success: false, error: 'not_configured', ... } when Tier 2 env vars are absent.
-router.post('/generate-cover-letter', async (req, res) => {
-  const { role, company, jobDescription } = req.body ?? {};
+const coverLetterSchema = z.object({
+  role:           z.string().min(1),
+  company:        z.string().min(1),
+  jobDescription: optionalText,
+});
 
-  if (!role || !company) {
-    return res.status(400).json({ status: 'error', message: 'role and company are required' });
-  }
+router.post('/generate-cover-letter', asyncHandler(async (req, res) => {
+  const body = parseBody(coverLetterSchema, req, res, 'role and company are required');
+  if (!body) return;
+  const { role, company, jobDescription } = body;
 
   const systemPrompt =
     'You are a professional cover letter writer. Write a focused 3-paragraph cover letter ' +
@@ -71,21 +96,18 @@ router.post('/generate-cover-letter', async (req, res) => {
     `Write a cover letter for this role:\nRole: ${role}\nCompany: ${company}` +
     (jobDescription ? `\n\nJob description:\n${jobDescription.slice(0, 3000)}` : '');
 
-  try {
-    const result = await callModel('tier2', 'cover_letter_generate', {
-      systemPrompt,
-      messages:    [{ role: 'user', content: userContent }],
-      maxTokens:   600,
-      temperature: 0.7,
-    });
+  const result = await callModel('tier2', 'cover_letter_generate', {
+    systemPrompt,
+    messages:    [{ role: 'user', content: userContent }],
+    maxTokens:   600,
+    temperature: 0.7,
+  });
 
-    // Return modelRouter result unchanged — not_configured, success, or any error
-    // shape passes straight through so the popup can handle each state cleanly.
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'internal_error', message: err.message });
-  }
-});
+  // Return modelRouter result unchanged — not_configured, success, or any error
+  // shape passes straight through so the popup can handle each state cleanly.
+  // A thrown error goes to the error handler (generic 500).
+  res.json(result);
+}));
 
 // ── Outreach message drafting — Tier 3 ───────────────────────────────────────
 // Calls Tier 3 (Claude) with company signals for tone calibration and the user's
@@ -105,16 +127,23 @@ const OUTREACH_SYSTEM_PROMPT =
   'human, not corporate boilerplate. End with a clear, low-effort ask (e.g. a quick chat, not ' +
   'demanding a referral outright).';
 
-router.post('/generate-outreach', async (req, res) => {
+const outreachSchema = z.object({
+  companyName: z.string().min(1),
+  roleTitle:   z.string().min(1),
+  jdText:      optionalText,
+  contactName: optionalText,
+  contactRole: optionalText,
+});
+
+router.post('/generate-outreach', asyncHandler(async (req, res) => {
   const userId = req.headers['x-user-id'];
   if (!userId) {
     return res.status(401).json({ status: 'error', message: 'x-user-id header required' });
   }
 
-  const { companyName, roleTitle, jdText, contactName, contactRole } = req.body ?? {};
-  if (!companyName || !roleTitle) {
-    return res.status(400).json({ status: 'error', message: 'companyName and roleTitle are required' });
-  }
+  const body = parseBody(outreachSchema, req, res, 'companyName and roleTitle are required');
+  if (!body) return;
+  const { companyName, roleTitle, jdText, contactName, contactRole } = body;
 
   // Non-fatal lookups — signals and skills are supplementary context, not blockers.
   let signals = null;
@@ -148,21 +177,17 @@ router.post('/generate-outreach', async (req, res) => {
     cohortContext  ? `\nCohort signal (tone calibration only — do not reference in message): ${cohortContext}` : null,
   ].filter(l => l !== null);
 
-  try {
-    const result = await callModel('tier3', 'outreach_draft', {
-      userId,
-      systemPrompt: OUTREACH_SYSTEM_PROMPT,
-      messages:     [{ role: 'user', content: lines.join('\n') }],
-      maxTokens:    300,
-      temperature:  0.7,
-    });
+  const result = await callModel('tier3', 'outreach_draft', {
+    userId,
+    systemPrompt: OUTREACH_SYSTEM_PROMPT,
+    messages:     [{ role: 'user', content: lines.join('\n') }],
+    maxTokens:    300,
+    temperature:  0.7,
+  });
 
-    // success, not_configured, quota_exceeded, and all error shapes pass through unchanged.
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'internal_error', message: err.message });
-  }
-});
+  // success, not_configured, quota_exceeded, and all error shapes pass through unchanged.
+  res.json(result);
+}));
 
 // ── Hidden Curriculum Decoder — Tier 2 ───────────────────────────────────────
 // Explains unwritten hiring-process rules using the four-barrier Schema Fit
@@ -190,19 +215,20 @@ const CURRICULUM_SYSTEM_PROMPT =
   'actually transferred, framed as "if this is true, then X should also be true — does ' +
   'that make sense?" rather than just asking "did you understand?"';
 
-router.post('/explain-hiring-process', async (req, res) => {
+const curriculumSchema = z.object({
+  topic: z.enum([...CURRICULUM_TOPICS]),
+});
+
+router.post('/explain-hiring-process', asyncHandler(async (req, res) => {
   const userId = req.headers['x-user-id'];
   if (!userId) {
     return res.status(401).json({ status: 'error', message: 'x-user-id header required' });
   }
 
-  const { topic } = req.body ?? {};
-  if (!topic || !CURRICULUM_TOPICS.has(topic)) {
-    return res.status(400).json({
-      status:  'error',
-      message: `topic is required and must be one of: ${[...CURRICULUM_TOPICS].join(', ')}`,
-    });
-  }
+  const body = parseBody(curriculumSchema, req, res,
+    `topic is required and must be one of: ${[...CURRICULUM_TOPICS].join(', ')}`);
+  if (!body) return;
+  const { topic } = body;
 
   let skills = [];
   try {
@@ -217,23 +243,19 @@ router.post('/explain-hiring-process', async (req, res) => {
     : 'The applicant has not uploaded a resume yet. Use a generic but relatable skill ' +
       'example (e.g. "writing code" or "building a spreadsheet") for Barrier 2.';
 
-  try {
-    const result = await callModel('tier2', 'curriculum_explain', {
-      systemPrompt: CURRICULUM_SYSTEM_PROMPT,
-      messages: [{
-        role:    'user',
-        content: `Topic: ${topic}\n\n${skillsLine}`,
-      }],
-      maxTokens:   700,
-      temperature: 0.6,
-    });
+  const result = await callModel('tier2', 'curriculum_explain', {
+    systemPrompt: CURRICULUM_SYSTEM_PROMPT,
+    messages: [{
+      role:    'user',
+      content: `Topic: ${topic}\n\n${skillsLine}`,
+    }],
+    maxTokens:   700,
+    temperature: 0.6,
+  });
 
-    // Plain prose output — no JSON parsing (same pattern as cover letter and outreach routes).
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'internal_error', message: err.message });
-  }
-});
+  // Plain prose output — no JSON parsing (same pattern as cover letter and outreach routes).
+  res.json(result);
+}));
 
 // All routes are mounted under /agent — matching how the gateway proxies them.
 // gateway: router.use('/agent', ...) → forwards /agent/* unchanged.
@@ -243,5 +265,22 @@ app.use((_req, res) => {
   res.status(404).json({ status: 'error', message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 3005;
-app.listen(PORT, () => console.log(`Agent Service running on port ${PORT}`));
+// Error handler: malformed or oversized JSON bodies get a 4xx; anything else is
+// logged here and the client gets a generic 500 without internal details.
+app.use((err, _req, res, _next) => {
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ status: 'error', message: 'Request body must be valid JSON' });
+  }
+  if (err.expose && err.status >= 400 && err.status < 500) {
+    return res.status(err.status).json({ status: 'error', message: err.message });
+  }
+  console.error('[Agent] Unhandled route error:', err);
+  res.status(500).json({ success: false, error: 'internal_error', message: 'Internal server error' });
+});
+
+module.exports = app;
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3005;
+  app.listen(PORT, () => console.log(`Agent Service running on port ${PORT}`));
+}

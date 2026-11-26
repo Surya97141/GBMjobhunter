@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://localhost:5173/*"],
-      "js": ["src/content/index.js"]
+      "js": ["src/config.js", "src/content/index.js"]
     }
   ],
   "action": {
