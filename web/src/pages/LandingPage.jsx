@@ -18,10 +18,19 @@ export default function LandingPage() {
   const { startDemo } = useAuth();
   const [demoState, setDemoState] = useState('idle'); // idle | loading | error
   const [demoError, setDemoError] = useState('');
+  // True once a demo start has taken long enough that the backend is probably
+  // waking from sleep (free-tier hosts take up to about a minute).
+  const [slowStart, setSlowStart] = useState(false);
+  const slowTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(slowTimer.current), []);
 
   async function handleTryDemo() {
     setDemoState('loading');
     setDemoError('');
+    setSlowStart(false);
+    clearTimeout(slowTimer.current);
+    slowTimer.current = setTimeout(() => setSlowStart(true), 4000);
     try {
       await startDemo();
       navigate('/dashboard');
@@ -31,8 +40,13 @@ export default function LandingPage() {
       setDemoError(
         status === 429 ? 'Too many demo sessions from your network. Try again in an hour.'
         : status === 404 ? 'The live demo is not enabled on this deployment.'
+        : err.code === 'ECONNABORTED' ? 'The demo server did not wake up in time. Please try again.'
+        : !err.response ? 'Could not reach the demo server. Check your connection and try again.'
         : 'Could not start the demo. Please try again in a moment.'
       );
+    } finally {
+      clearTimeout(slowTimer.current);
+      setSlowStart(false);
     }
   }
 
@@ -91,11 +105,15 @@ export default function LandingPage() {
                 {demoState === 'loading' ? 'Starting demo…' : 'Try the demo'}
               </button>
             </div>
-            <p className={styles.demoNote} role={demoState === 'error' ? 'alert' : undefined}>
-              {demoState === 'error'
-                ? demoError
-                : 'No sign-up needed. The demo uses synthetic sample data.'}
-            </p>
+            {demoState === 'error' ? (
+              <p className={styles.demoNote} role="alert">{demoError}</p>
+            ) : (
+              <p className={styles.demoNote} role="status" aria-live="polite">
+                {demoState === 'loading' && slowStart
+                  ? 'Waking the demo server. This can take up to a minute on the free tier, please keep this tab open.'
+                  : 'No sign-up needed. The demo uses synthetic sample data.'}
+              </p>
+            )}
           </div>
 
           <div className={styles.heroRight}>
