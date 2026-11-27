@@ -42,7 +42,7 @@ const DEMO_PATTERNS = [
       ghosted_count: 101, rejected_count: 74, interview_count: 46, offer_count: 19, cohort_size: 240,
     },
     headline: '42% of similar applicants were ghosted',
-    action:   'Sample insight: in this synthetic cohort, applications with ATS scores above 75 were ghosted far less often. Tailor your resume keywords to each posting before you apply.',
+    action:   'Sample insight: in this synthetic cohort, applications with keyword match above 75% were ghosted far less often. Tailor your resume keywords to each posting before you apply.',
   },
   {
     roleBucket: 'demo_frontend', skillCluster: 'css.node.js.react.sql', patternType: 'ats_score_effect',
@@ -51,8 +51,8 @@ const DEMO_PATTERNS = [
       ghost_rate: 0.28, rejection_rate: 0.22, avg_ats_score: 79.1,
       ghosted_count: 50, rejected_count: 40, interview_count: 62, offer_count: 28, cohort_size: 180,
     },
-    headline: 'Higher ATS scores doubled interview rates',
-    action:   'Sample insight: applicants scoring 75+ reached interview at roughly twice the rate of those below 60. Your Orchard Health application scored 85.',
+    headline: 'Sample: higher keyword match, more interviews',
+    action:   'Sample insight from synthetic data: applicants with 75%+ keyword match reached interview at roughly twice the rate of those below 60%. Your Orchard Health application had an 85% keyword match.',
   },
 ];
 

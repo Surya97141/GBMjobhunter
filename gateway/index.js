@@ -55,6 +55,27 @@ app.use((_req, res) => {
   res.status(404).json({ status: 'error', message: 'Route not found' });
 });
 
+// ── Errors ──────────────────────────────────────────────────────────────────
+// Without this, Express's default handler logs err.stack and (outside
+// production) returns it. For a malformed JSON body the parser's message quotes
+// part of the body, which on AI routes can contain a user's API key. So body
+// errors get a FIXED response and are not logged, and anything else is logged
+// by name only, never by message or stack.
+app.use((err, _req, res, _next) => {
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ status: 'error', message: 'Request body must be valid JSON' });
+  }
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ status: 'error', message: 'Request body is too large' });
+  }
+  if (typeof err.type === 'string' && err.status >= 400 && err.status < 500) {
+    // Other body-parser errors (unsupported charset, aborted request, ...).
+    return res.status(err.status).json({ status: 'error', message: 'Request body could not be read' });
+  }
+  console.error(`[Gateway] Unhandled error: ${err?.name ?? 'Error'}`);
+  res.status(500).json({ status: 'error', message: 'Internal server error' });
+});
+
 // ── Start ───────────────────────────────────────────────────────────────────
 // Export the app so Supertest can require() it without calling listen().
 // The server only starts when this file is the entry point.

@@ -7,7 +7,7 @@
  * budget. Instead, this script runs the whole backend inside ONE service:
  *
  *   1. apply migrations and seed skill demand (both idempotent)
- *   2. start user, jobs, opportunity and the intelligence worker on localhost
+ *   2. start user, jobs, opportunity, agent (AI) and the intelligence worker on localhost
  *   3. start the gateway on the public $PORT
  *
  * If any child dies, this process exits so the platform restarts everything
@@ -15,6 +15,9 @@
  *
  * Run: node scripts/demo-start.js
  * Required env: DATABASE_URL, REDIS_URL, JWT_SECRET, PORT (set by the host)
+ * Optional env: GROQ_API_KEY enables the shared "demo" AI mode. Without it the
+ *               agent still runs: bring-your-own-key AI works, demo AI reports
+ *               itself unavailable, and the rest of the app is unaffected.
  */
 
 const { spawn, spawnSync } = require('child_process');
@@ -32,13 +35,18 @@ for (const name of ['DATABASE_URL', 'REDIS_URL', 'JWT_SECRET']) {
 const PUBLIC_PORT = process.env.PORT || '10000';
 
 // Internal ports: only reachable inside the container.
-const INTERNAL = { user: '3001', jobs: '3002', opportunity: '3003' };
+const INTERNAL = { user: '3001', jobs: '3002', opportunity: '3003', agent: '3005' };
 
 // Run the intelligence worker too (default on). Without a consumer, BullMQ
 // events from the jobs service would pile up in the small free Redis instance.
 const RUN_WORKER = process.env.DEMO_RUN_WORKER !== 'false';
 
-// Cap each process's heap so five Node processes fit a 512 MB free instance.
+// Run the agent (AI) service too (default on). Set DEMO_RUN_AGENT=false to skip
+// it on a very small instance; /agent/* then returns 502 and the UI says AI is
+// unavailable.
+const RUN_AGENT = process.env.DEMO_RUN_AGENT !== 'false';
+
+// Cap each process's heap so the Node processes fit a 512 MB free instance.
 const HEAP_MB = process.env.DEMO_HEAP_MB || '96';
 
 // ── 1. Database setup ────────────────────────────────────────────────────────
@@ -106,6 +114,7 @@ process.on('SIGINT', () => shutdown(0));
 start('user',        'services/user',        { PORT: INTERNAL.user, DEMO_MODE_ENABLED: 'true' });
 start('jobs',        'services/jobs',        { PORT: INTERNAL.jobs });
 start('opportunity', 'services/opportunity', { PORT: INTERNAL.opportunity });
+if (RUN_AGENT)  start('agent',       'services/agent',       { PORT: INTERNAL.agent });
 if (RUN_WORKER) start('intelligence', 'services/intelligence', {});
 
 // ── 3. Public gateway ────────────────────────────────────────────────────────
@@ -116,8 +125,7 @@ start('gateway', 'gateway', {
   USER_SERVICE_URL:        `http://localhost:${INTERNAL.user}`,
   JOBS_SERVICE_URL:        `http://localhost:${INTERNAL.jobs}`,
   OPPORTUNITY_SERVICE_URL: `http://localhost:${INTERNAL.opportunity}`,
-  // No agent service in the demo: /agent/* returns 502 and the UI says AI is unavailable.
-  AGENT_SERVICE_URL:       process.env.AGENT_SERVICE_URL || `http://localhost:3005`,
+  AGENT_SERVICE_URL:       process.env.AGENT_SERVICE_URL || `http://localhost:${INTERNAL.agent}`,
   TRUST_PROXY:             process.env.TRUST_PROXY || '1',
 });
 

@@ -49,3 +49,8 @@ services:
       # Set in the Render dashboard to your Vercel URL, e.g. https://gbm-demo.vercel.app
       - key: ALLOWED_ORIGINS
         sync: false
+      # Optional: shared Groq key for the "demo" AI mode. Set it in the Render
+      # dashboard only; never commit a value. Without it, demo AI reports itself
+      # unavailable and bring-your-own-key AI still works.
+      - key: GROQ_API_KEY
+        sync: false

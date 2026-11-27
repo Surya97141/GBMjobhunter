@@ -55,7 +55,8 @@ export default function DemoBanner() {
           <ul className={styles.status}>
             <li><strong>Live:</strong> application tracking, dashboard and profile, backed by a real database and API gateway.</li>
             <li><strong>Sample-driven:</strong> insights and cohort numbers are pre-seeded, not computed from real applicants.</li>
-            <li><strong>May be unavailable:</strong> AI features (resume parsing, cover letters) need provider keys and can be switched off on the demo host.</li>
+            <li><strong>Rule-based, no AI:</strong> resume parsing and the profile suggestions it produces.</li>
+            <li><strong>Optional AI:</strong> explanations on the Opportunities page use either the shared demo key (if the host has one configured) or your own API key, which stays in this tab&apos;s memory.</li>
             <li><strong>Separate install:</strong> the Chrome extension (form auto-fill) and the mobile app are not part of this hosted demo.</li>
           </ul>
         </div>

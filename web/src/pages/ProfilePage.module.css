@@ -34,6 +34,15 @@
   padding: 40px;
 }
 
+/* A request failed: shown instead of an empty state that would look like "no data" */
+.loadError {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-low);
+  margin: 0;
+}
+
 /* ─── TWO-COLUMN GRID ────────────────────────────────────────────────────────── */
 
 .grid {
@@ -326,6 +335,16 @@
 
 .fieldLabel:first-of-type {
   margin-top: 0;
+}
+
+/* Marks a field that was filled from resume suggestions and not yet saved */
+.fromResume {
+  margin-left: 6px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: italic;
+  color: var(--text-secondary);
 }
 
 .fieldInput {

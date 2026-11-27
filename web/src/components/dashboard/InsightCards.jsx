@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heading } from '../Typography';
 import client from '../../api/client';
@@ -41,11 +40,13 @@ function EmptyState() {
 export default function InsightCards() {
   const [insights, setInsights] = useState([]);
   const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(false);
 
   useEffect(() => {
     client.get('/users/me/insights')
       .then(res => setInsights(res.data.data.insights.slice(0, 3)))
-      .catch(() => {}) // fail silently — show empty state
+      // A failed request is reported as an error, not shown as "no insights yet".
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -69,12 +70,15 @@ export default function InsightCards() {
 
       <div className={styles.sectionHeader}>
         <Heading as="h2">Your Insights</Heading>
-        {insights.length > 0 && (
-          <Link to="/dashboard/insights" className={styles.viewAll}>View all →</Link>
-        )}
       </div>
 
-      {loading ? null : insights.length === 0 ? (
+      {loading ? (
+        <p className={styles.stateText} role="status">Loading insights…</p>
+      ) : error ? (
+        <p className={styles.errorText} role="alert">
+          Could not load your insights. Try reloading the page.
+        </p>
+      ) : insights.length === 0 ? (
         <EmptyState />
       ) : (
         <motion.ul

@@ -33,6 +33,13 @@ The service URL is shown at the top of the service page. It may differ from the 
    `VITE_API_URL=https://<your-service>.onrender.com` (no trailing slash, no `/api`).
 3. Deploy. Note your production URL, for example `https://gbm-demo.vercel.app`.
 
+Both [`vercel.json`](../vercel.json) and [`web/vercel.json`](../web/vercel.json) exist, for a project whose Root
+Directory is the repo root or `web/`; keep them in sync. Their SPA rewrite deliberately excludes `/assets/`:
+a missing hashed asset must return 404, not `index.html`. Serving HTML for a missing chunk is what produced
+`error loading dynamically imported module` / `Unable to preload CSS` in a tab left open across a redeploy.
+The app reloads once on such an error to pick up the new build. Vercel's optional **Skew Protection**
+(project settings) additionally keeps serving the previous deployment's assets to old tabs.
+
 ## 3. Allow the web app to call the API
 
 Back in Render, open the `gbm-demo-api` service → **Environment** and set
@@ -67,9 +74,10 @@ services to the same Render workspace, you may exceed the allowance, so check th
   the migrations and seeding on the next start.
 - **Redis is in-memory.** A restart clears queued jobs and rate-limit counters. `maxmemoryPolicy` is
   `noeviction` because BullMQ would silently lose jobs under eviction.
-- **Memory.** Five Node processes share one small instance. On a Windows dev machine they used about
-  330 MB in total; measure on Render's dashboard after the first deploy. If it runs out, set
-  `DEMO_RUN_WORKER=false` to drop the intelligence worker. The demo still works, because insights are seeded.
+- **Memory.** Six Node processes (gateway, four services, the intelligence worker) share one small instance.
+  Five of them used about 330 MB on a Windows dev machine; the agent service was added since, so measure on
+  Render's dashboard after deploying. If it runs out, set `DEMO_RUN_WORKER=false` to drop the intelligence
+  worker (insights are seeded), or `DEMO_RUN_AGENT=false` to drop AI.
 
 ## What the demo includes
 
@@ -79,8 +87,37 @@ services to the same Render workspace, you may exceed the allowance, so check th
 | Insight cards, insights map | Sample data seeded for the demo, not computed from real applicants |
 | Async pipeline (events to worker to database) | Live: logging or moving a new application produces an event the worker stores |
 | Opportunities | Curated static data |
-| AI features (resume parsing, cover letters) | Not enabled: no agent service or provider keys |
+| Resume parsing, profile suggestions | Live; rule-based parsing, no AI involved |
+| AI explanations (Opportunities, Hidden Curriculum Decoder) | Bring-your-own-key always; shared demo key only if `GROQ_API_KEY` is set |
 | Chrome extension, mobile app | Separate installs, not part of the hosted demo |
+
+## AI modes
+
+The web app's AI explanations run through the agent service in one of two modes:
+
+- **Demo (shared key).** Set `GROQ_API_KEY` on the Render service (dashboard only; `render.yaml` declares
+  it with `sync: false` and no value). Never commit a key. Requests are limited per user per day
+  (`AI_DEMO_DAILY_LIMIT_PER_USER`, default 20) and for all users together (`AI_DEMO_DAILY_LIMIT_TOTAL`,
+  default 500). If the variable is missing, demo mode shows as unavailable and nothing else changes.
+- **Bring your own key.** A user picks Groq or OpenAI and pastes their key. The key is held in
+  the browser tab's memory only (not localStorage, sessionStorage or the database), sent over HTTPS with
+  each AI request to the authenticated gateway, relayed to the agent service, used for that one provider
+  call and dropped. It is not logged, and provider error text is never returned, since some providers echo
+  part of the key. Provider endpoints are fixed in code; requests cannot set a base URL or model.
+
+Anthropic is implemented but **disabled** unless `AI_ENABLE_ANTHROPIC=true` on the agent service. Its
+requests are tested offline against the installed SDK with a fake transport, but have not been checked
+against the live API with a real key, so do that before enabling it. While disabled it is not listed and
+requests that select it are rejected.
+
+The gateway limits the model-calling `/agent/*` routes (POST guidance, decoder, cover letter, outreach)
+to `AI_RATE_LIMIT_PER_MINUTE` (default 10) per user; status and health checks are not counted. It waits up to
+`AGENT_PROXY_TIMEOUT_MS` (default 30 s) for a reply. The agent's provider timeout is `AI_TIMEOUT_MS`
+(default 25 s). Optional model overrides: `GROQ_MODEL`, `OPENAI_MODEL`, `ANTHROPIC_MODEL`.
+
+What a provider receives: for Opportunities guidance, the user's resume skills, target role and the
+recommended skills; for the decoder, the chosen topic and the resume skills. The UI says this before each
+request.
 
 ## Demo accounts
 

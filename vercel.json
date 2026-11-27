@@ -3,5 +3,5 @@
   "installCommand": "npm ci --workspace=@gbm/web",
   "buildCommand": "npm run build --workspace=@gbm/web",
   "outputDirectory": "web/dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
 }

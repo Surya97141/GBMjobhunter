@@ -2,26 +2,33 @@ import { motion } from 'framer-motion';
 import { Label, Heading, Display, Small } from '../../components/Typography';
 import styles from './MetricsSection.module.css';
 
+// How the app's numbers are worked out. Every figure here is a rule in the
+// code, not a market statistic: the app has no data set that would support
+// claims about the job market as a whole.
+//   0–100%: services/jobs/src/utils/tfidf.js (keyword match)
+//   50+:    services/intelligence/src/services/patternComputation.service.js (MIN_COHORT_SIZE)
+//   3+:     services/jobs/src/services/ghostScore.service.js (MIN_COHORT)
+//   0:      resume parsing and skill recommendations are rule-based; AI explanations are optional
 const METRICS = [
   {
-    value:  '47',
-    label:  'Average applications before first offer',
-    note:   'across all tracked users',
+    value:  '0–100%',
+    label:  'Keyword match',
+    note:   'share of a posting\'s words found in your resume; not an applicant tracking system score',
   },
   {
-    value:  '68%',
-    label:  'Of applications ghosted',
-    note:   'within 21 days of submission',
+    value:  '50+',
+    label:  'Similar applicants per cohort',
+    note:   'before any cohort insight is shown',
   },
   {
-    value:  '14d',
-    label:  'Median response window',
-    note:   'for companies that do reply',
+    value:  '3+',
+    label:  'Applications to the same posting',
+    note:   'before a ghost-risk estimate is shown',
   },
   {
-    value:  '3.2×',
-    label:  'Better ATS pass rate',
-    note:   'with a skill-matched resume',
+    value:  '0',
+    label:  'AI calls to parse your resume or rank skills',
+    note:   'both are rule-based; AI explanations are optional',
   },
 ];
 
@@ -44,8 +51,8 @@ export default function MetricsSection() {
     <section className={styles.section}>
 
       <div className={styles.header}>
-        <Label color="accent" className={styles.overline}>BY THE NUMBERS</Label>
-        <Heading>The market signals you&apos;ve been missing</Heading>
+        <Label color="accent" className={styles.overline}>HOW IT IS MEASURED</Label>
+        <Heading>The rules behind the numbers you see</Heading>
       </div>
 
       <motion.ul
@@ -54,7 +61,7 @@ export default function MetricsSection() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
-        aria-label="Key job search statistics"
+        aria-label="How the app's numbers are worked out"
       >
         {METRICS.map((m) => (
           <motion.li

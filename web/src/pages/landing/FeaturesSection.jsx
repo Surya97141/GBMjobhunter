@@ -7,11 +7,13 @@ import styles from './FeaturesSection.module.css';
 const FEATURES = [
   {
     index: '01',
-    title: 'ATS Intelligence',
+    title: 'Keyword Match',
     sceneUrl: 'https://prod.spline.design/fJ2ptJKzT-sDkpfO/scene.splinecode',
     description:
-      'Score your resume against any job description before you hit submit. Our TF-IDF keyword engine surfaces exactly which terms you\'re missing and explains why automated screeners reject applications before a human ever reads them.',
-    tags: ['TF-IDF Scoring', 'Keyword Gap Analysis', 'JD Fingerprinting', 'ATS Platform Detection'],
+      'Compare your resume with a job description before you apply. The keyword match shows how much of the posting\'s wording your resume already covers. It measures word overlap only: it is not a score from an applicant tracking system and does not predict whether you will be screened in.',
+    // No missing-keywords tag: the match is a single percentage; it does not list
+    // which keywords are missing.
+    tags: ['Keyword Overlap', 'Per-Posting Match', 'JD Fingerprinting', 'ATS Platform Detection'],
   },
   {
     index: '02',

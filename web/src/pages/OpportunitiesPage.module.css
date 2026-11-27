@@ -281,7 +281,7 @@
 }
 
 .topicBtn:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--bg-card);
   border-color: var(--border-strong);
   color: var(--text-primary);
 }
@@ -358,3 +358,41 @@
   line-height: 1.5;
   margin-bottom: 0;
 }
+
+/* ─── Resume basis and per-skill reason (deterministic) ───────────────────── */
+
+.basedOn {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.basedOn strong { color: var(--text-primary); font-weight: 600; }
+
+.buildsOn {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.buildsOn strong { color: var(--text-primary); font-weight: 600; }
+
+/* ─── AI output ───────────────────────────────────────────────────────────── */
+
+.aiLabel {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.guidanceList {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.guidanceList li + li { margin-top: 8px; }

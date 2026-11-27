@@ -1,0 +1,40 @@
+.inApp {
+  padding: 48px 48px 80px;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .inApp {
+    padding: 24px 16px 64px;
+  }
+}

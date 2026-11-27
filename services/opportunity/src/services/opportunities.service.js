@@ -32,7 +32,10 @@ async function buildRecommendations(currentSkills, interests) {
     const prereqsMet = meta.prerequisites.every(p => known.has(normalise(p)));
     if (!prereqsMet) continue;
 
-    const prereqOverlap = meta.prerequisites.filter(p => known.has(normalise(p))).length;
+    // The user's own skills that lead into this one — shown to the user as the
+    // concrete reason for the recommendation (and the only basis AI guidance may use).
+    const matchedPrerequisites = meta.prerequisites.filter(p => known.has(normalise(p)));
+    const prereqOverlap = matchedPrerequisites.length;
     const interestBoost = interests.map(normalise).some(i =>
       skill.includes(i) || (meta.domain && meta.domain === i)
     ) ? 1 : 0;
@@ -48,6 +51,7 @@ async function buildRecommendations(currentSkills, interests) {
       level:      meta.level,
       domain:     meta.domain,
       score,
+      matchedPrerequisites,
       courses:    COURSES[skill] || [],
       dataSource: hasCohortData ? 'cohort' : 'heuristic',
       ...(hasCohortData && { reason: buildReason(finding) }),
