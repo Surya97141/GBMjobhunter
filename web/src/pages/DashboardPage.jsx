@@ -60,10 +60,13 @@ function DashboardATSRing({ score }) {
     : score >= 40 ? 'var(--color-mid)'
     : 'var(--color-low)';
 
+  // ats_score_cache is a resume COMPLETENESS heuristic computed on upload
+  // (skills, experience, education, amount of text). It is not a score from an
+  // applicant tracking system and not a per-job keyword match.
   const description = !score || score === 0 ? null
-    : score >= 70 ? 'Strong keyword match'
-    : score >= 40 ? 'Moderate — room to improve'
-    : 'Weak — update your resume';
+    : score >= 70 ? 'Most sections found'
+    : score >= 40 ? 'Partly complete — room to add detail'
+    : 'Sparse — add skills and experience';
 
   return (
     <div className={styles.ringWrapper}>
@@ -88,7 +91,7 @@ function DashboardATSRing({ score }) {
           </div>
         </foreignObject>
       </svg>
-      <p className={styles.ringLabel}>ATS Score</p>
+      <p className={styles.ringLabel}>Resume completeness</p>
       <p className={styles.ringDesc}>
         {description ?? 'No resume yet'}
       </p>
@@ -113,9 +116,11 @@ function atsBadgeStyle(score) {
   if (score === null || score === undefined) {
     return { label: '—', bg: 'var(--bg-surface)', color: 'var(--text-muted)' };
   }
-  if (score >= 70) return { label: String(score), bg: 'var(--color-high-subtle)', color: 'var(--color-high)' };
-  if (score >= 40) return { label: String(score), bg: 'var(--color-mid-subtle)',  color: 'var(--color-mid)'  };
-  return              { label: String(score), bg: 'var(--color-low-subtle)',  color: 'var(--color-low)'  };
+  // Keyword match: share of the job description's keywords found in the resume.
+  const label = `${score}% match`;
+  if (score >= 70) return { label, bg: 'var(--color-high-subtle)', color: 'var(--color-high)' };
+  if (score >= 40) return { label, bg: 'var(--color-mid-subtle)',  color: 'var(--color-mid)'  };
+  return              { label, bg: 'var(--color-low-subtle)',  color: 'var(--color-low)'  };
 }
 
 function formatDate(isoString) {
@@ -258,6 +263,7 @@ export default function DashboardPage() {
                       <span
                         className={styles.pill}
                         style={{ background: ats.bg, color: ats.color }}
+                        title="Keyword match: share of the job description's keywords found in your resume"
                       >
                         {ats.label}
                       </span>

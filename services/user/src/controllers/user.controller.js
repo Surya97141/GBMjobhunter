@@ -1,6 +1,7 @@
 const pdfParse  = require('pdf-parse');
 const userService = require('../services/user.service');
 const { parseResumeText, resumeQualityScore } = require('../utils/resumeParser');
+const { buildProfileSuggestions } = require('../utils/profileSuggestions');
 const { sendError, sendSuccess } = require('../utils/errors');
 
 async function getMe(req, res) {
@@ -56,10 +57,15 @@ async function uploadResume(req, res) {
     const qualityScore = resumeQualityScore(parsed);
     const user         = await userService.saveResumeAndScore(req.user.sub, parsed, qualityScore);
 
+    // ats_score is kept for existing clients; it is the resume completeness
+    // heuristic (resumeQualityScore), not a score from an ATS vendor.
     return sendSuccess(res, 200, {
       user,
-      resume:    parsed,
-      ats_score: qualityScore,
+      resume:              parsed,
+      ats_score:           qualityScore,
+      completeness_score:  qualityScore,
+      // Evidence-backed suggestions for profile fields; never saved automatically.
+      profile_suggestions: buildProfileSuggestions(parsed),
     });
   } catch (err) {
     return sendError(res, err.statusCode || 500, err.message);
@@ -69,7 +75,7 @@ async function uploadResume(req, res) {
 async function getResume(req, res) {
   try {
     const resume = await userService.getResume(req.user.sub);
-    return sendSuccess(res, 200, { resume });
+    return sendSuccess(res, 200, { resume, profile_suggestions: buildProfileSuggestions(resume) });
   } catch (err) {
     return sendError(res, err.statusCode || 500, err.message);
   }

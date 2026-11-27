@@ -47,7 +47,7 @@ export default function ApplicationList({ applications = [], loading = false }) 
           <tr>
             <th>Company</th>
             <th>Role</th>
-            <th>ATS</th>
+            <th>Keyword match</th>
             <th>Status</th>
             <th>Applied</th>
           </tr>

@@ -7,7 +7,12 @@ if (!process.env.REDIS_URL) throw new Error('REDIS_URL env var is required');
 const express     = require('express');
 const { z }       = require('zod');
 const { callModel } = require('./src/services/modelRouter.service');
-const { getCompanySignals, getUserSkills } = require('./src/db/lookup.db');
+const { getCompanySignals, getUserSkills, getUserAiContext } = require('./src/db/lookup.db');
+const { aiOptionsSchema, aiStatus, runAi, isProviderEnabled } = require('./src/services/ai/aiClient.service');
+const {
+  guidanceRequestSchema, SYSTEM_PROMPT: GUIDANCE_SYSTEM_PROMPT, buildUserMessage, sanitiseGuidance,
+} = require('./src/services/ai/opportunityGuidance.service');
+const { failure } = require('./src/services/ai/errors');
 
 const app    = express();
 const router = express.Router();
@@ -32,6 +37,35 @@ function parseBody(schema, req, res, message) {
     return null;
   }
   return result.data;
+}
+
+// Validates the `ai` block of a request ({ mode: 'demo' } or { mode: 'byok',
+// provider, apiKey }). On failure it sends a FIXED message: no validation
+// details, so nothing from the body (such as part of a key) is echoed back.
+function parseAiOptions(req, res) {
+  const result = aiOptionsSchema.safeParse(req.body?.ai);
+  if (!result.success) {
+    res.status(400).json({
+      status:  'error',
+      message: 'ai must be { mode: "demo" } or { mode: "byok", provider: "groq" | "openai" | "anthropic", apiKey }',
+    });
+    return null;
+  }
+  // A known provider that this server has not enabled (Anthropic, by default).
+  if (result.data.mode === 'byok' && !isProviderEnabled(result.data.provider)) {
+    res.status(400).json({ status: 'error', ...failure('provider_disabled') });
+    return null;
+  }
+  return result.data;
+}
+
+function requireUserId(req, res) {
+  const userId = req.headers['x-user-id'];
+  if (!userId) {
+    res.status(401).json({ status: 'error', message: 'x-user-id header required' });
+    return null;
+  }
+  return userId;
 }
 
 // ── Health — tier configuration check ────────────────────────────────────────
@@ -230,6 +264,14 @@ router.post('/explain-hiring-process', asyncHandler(async (req, res) => {
   if (!body) return;
   const { topic } = body;
 
+  // Optional AI mode selection from the web app. Without it, the route keeps its
+  // original behaviour (Tier 2 from server env vars).
+  let ai = null;
+  if (req.body?.ai !== undefined) {
+    ai = parseAiOptions(req, res);
+    if (!ai) return;
+  }
+
   let skills = [];
   try {
     skills = await getUserSkills(userId);
@@ -243,6 +285,16 @@ router.post('/explain-hiring-process', asyncHandler(async (req, res) => {
     : 'The applicant has not uploaded a resume yet. Use a generic but relatable skill ' +
       'example (e.g. "writing code" or "building a spreadsheet") for Barrier 2.';
 
+  if (ai) {
+    const result = await runAi({
+      ai, userId, task: 'curriculum_explain',
+      system: CURRICULUM_SYSTEM_PROMPT,
+      user:   `Topic: ${topic}\n\n${skillsLine}`,
+      maxTokens: 900,
+    });
+    return res.json(result);
+  }
+
   const result = await callModel('tier2', 'curriculum_explain', {
     systemPrompt: CURRICULUM_SYSTEM_PROMPT,
     messages: [{
@@ -255,6 +307,56 @@ router.post('/explain-hiring-process', asyncHandler(async (req, res) => {
 
   // Plain prose output — no JSON parsing (same pattern as cover letter and outreach routes).
   res.json(result);
+}));
+
+// ── AI modes for the web app ─────────────────────────────────────────────────
+// Which modes are usable on this server. Never includes any key.
+router.get('/ai/status', (_req, res) => {
+  res.json({ status: 'success', data: aiStatus() });
+});
+
+// Explains the deterministic Opportunities recommendations. The provider sees
+// only resume skills, target role and the recommendations (see
+// opportunityGuidance.service.js for the grounding rules).
+router.post('/ai/opportunity-guidance', asyncHandler(async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const ai = parseAiOptions(req, res);
+  if (!ai) return;
+
+  const parsed = guidanceRequestSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    return res.status(400).json({ status: 'error', message: 'recommendations must be a list of 1 to 10 skills' });
+  }
+  const { recommendations } = parsed.data;
+
+  let context = { skills: [], targetRole: null };
+  try {
+    context = await getUserAiContext(userId);
+  } catch {
+    console.error('[OpportunityGuidance] profile context lookup failed');
+  }
+
+  const result = await runAi({
+    ai, userId, task: 'opportunity_guidance',
+    system: GUIDANCE_SYSTEM_PROMPT,
+    user:   buildUserMessage({ ...context, recommendations }),
+    maxTokens: 1200,
+    json: true,
+  });
+  if (!result.success) return res.json(result);
+
+  try {
+    const guidance = sanitiseGuidance(result.text, recommendations);
+    return res.json({
+      success: true,
+      guidance,
+      provider: result.provider, providerLabel: result.providerLabel, model: result.model, mode: result.mode,
+    });
+  } catch {
+    return res.json(failure('bad_output'));
+  }
 }));
 
 // All routes are mounted under /agent — matching how the gateway proxies them.

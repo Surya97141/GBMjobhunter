@@ -2,14 +2,15 @@ const axios  = require('axios');
 const http   = require('http');
 const { Router } = require('express');
 const { requireAuth } = require('../middleware/auth.middleware');
-const { standardLimiter, resumeUploadLimiter, demoLimiter } = require('../middleware/rateLimiter.middleware');
+const { standardLimiter, resumeUploadLimiter, demoLimiter, aiLimiter } = require('../middleware/rateLimiter.middleware');
 
 const router = Router();
 
 // ── JSON relay ───────────────────────────────────────────────────────────────
 // Forwards requests where express.json() has already parsed the body.
 // Do NOT use this for multipart/form-data — use streamForward instead.
-function forward(baseUrl) {
+// Bodies are relayed, never logged (AI requests may carry a user's API key).
+function forward(baseUrl, { timeout = 9000 } = {}) {
   return async (req, res) => {
     try {
       const upstream = await axios({
@@ -23,7 +24,7 @@ function forward(baseUrl) {
         data:           ['GET', 'DELETE', 'HEAD'].includes(req.method.toUpperCase()) ? undefined : req.body,
         params:         undefined, // already encoded in req.originalUrl
         validateStatus: () => true, // never throw on HTTP error codes
-        timeout:        9000,
+        timeout,
       });
 
       res.status(upstream.status).json(upstream.data);
@@ -102,8 +103,35 @@ router.use('/jobs',         requireAuth, standardLimiter, forward(process.env.JO
 router.use('/opportunities', requireAuth, standardLimiter, forward(process.env.OPPORTUNITY_SERVICE_URL));
 
 // ── Protected agent routes ────────────────────────────────────────────────────
-// Standard rate limit (100 req/min) covers total throughput.
-// Per-user Tier 3 quota (5 calls/day) is enforced inside the agent service itself.
-router.use('/agent', requireAuth, standardLimiter, forward(process.env.AGENT_SERVICE_URL));
+// Standard limit (100 req/min) on everything, plus a tighter per-user AI limit
+// on the routes that call a model provider. Read-only checks (GET /agent/health,
+// GET /agent/ai/status) are not model calls, so they don't use up the AI limit.
+// Daily quotas (Tier 3, shared demo key) are enforced inside the agent service.
+// Model calls can take longer than other upstreams, so the relay waits longer
+// than the agent's own provider timeout (AI_TIMEOUT_MS, default 25 s).
+const AGENT_MODEL_ROUTES = new Set([
+  '/ai/opportunity-guidance',
+  '/explain-hiring-process',
+  '/generate-cover-letter',
+  '/generate-outreach',
+]);
+
+function isAgentModelCall(req) {
+  // req.path is relative to the /agent mount; ignore a trailing slash.
+  const path = req.path.length > 1 ? req.path.replace(/\/+$/, '') : req.path;
+  return req.method === 'POST' && AGENT_MODEL_ROUTES.has(path);
+}
+
+function aiLimiterForModelCalls(req, res, next) {
+  return isAgentModelCall(req) ? aiLimiter(req, res, next) : next();
+}
+
+router.use(
+  '/agent',
+  requireAuth,
+  standardLimiter,
+  aiLimiterForModelCalls,
+  forward(process.env.AGENT_SERVICE_URL, { timeout: Number(process.env.AGENT_PROXY_TIMEOUT_MS) || 30_000 }),
+);
 
 module.exports = router;

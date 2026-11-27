@@ -32,7 +32,10 @@ function showState(name) {
   document.getElementById(`state-${name}`).classList.add('active');
 }
 
-// ─── ATS SCORE HELPERS ────────────────────────────────────────────────────────
+// ─── KEYWORD MATCH HELPERS ────────────────────────────────────────────────────
+// The score is keyword overlap between the resume and the job description: the
+// share of the posting's keywords also found in the resume. It is not a score
+// from an applicant tracking system and does not predict screening outcomes.
 
 function scoreColour(score) {
   if (score >= 80) return '#10b981';
@@ -46,9 +49,12 @@ function scoreLabel(score) {
   return 'Low match';
 }
 
+// Describes the score itself; it does not claim a count of missing skills,
+// which the score does not contain.
 function scoreMissing(score) {
-  const n = Math.max(0, Math.round((100 - score) / 10));
-  return n === 0 ? 'All key skills matched' : `${n} skill${n > 1 ? 's' : ''} missing`;
+  return score >= 100
+    ? "All of the posting's keywords found in your resume"
+    : `${score}% of the posting's keywords found in your resume`;
 }
 
 // ─── POPULATE FUNCTIONS ───────────────────────────────────────────────────────
@@ -78,7 +84,7 @@ function populateJob(job) {
   scoreText.setAttribute('fill', colour);
 
   document.getElementById('ats-label').textContent = score > 0 ? scoreLabel(score)  : 'Score pending';
-  document.getElementById('ats-sub').textContent   = score > 0 ? scoreMissing(score) : 'Fetching ATS data…';
+  document.getElementById('ats-sub').textContent   = score > 0 ? scoreMissing(score) : 'Fetching keyword match…';
 
   populateGhostScore(job.ghostScore ?? null);
 }

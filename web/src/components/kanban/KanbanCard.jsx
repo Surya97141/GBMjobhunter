@@ -60,10 +60,14 @@ function CardContent({ card, ghostScore }) {
       <p className={styles.role}>{card.role_title}</p>
 
       <div className={styles.footer}>
-        <span className={styles.atsBadge} data-level={level}>
+        <span
+          className={styles.atsBadge}
+          data-level={level}
+          title="Keyword match: share of the job description's keywords found in your resume"
+        >
           {card.ats_score_at_apply !== null && card.ats_score_at_apply !== undefined
-            ? `ATS ${card.ats_score_at_apply}`
-            : 'ATS —'}
+            ? `${card.ats_score_at_apply}% match`
+            : 'Match —'}
         </span>
 
         {gLevel && gText && (

@@ -173,14 +173,18 @@
   margin-bottom: 20px;
 }
 
-.viewAll {
+/* ─── LOADING / ERROR ──────────────────────────────────────────────────────── */
+
+.stateText,
+.errorText {
   font-family: var(--font-body);
-  font-size: 12px;
-  color: var(--accent);
-  text-decoration: none;
+  font-size: 13px;
+  margin: 0;
+  padding: 16px 0;
 }
 
-.viewAll:hover { text-decoration: underline; }
+.stateText { color: var(--text-secondary); }
+.errorText { color: var(--color-low); }
 
 /* ─── EMPTY STATE ──────────────────────────────────────────────────────────── */
 

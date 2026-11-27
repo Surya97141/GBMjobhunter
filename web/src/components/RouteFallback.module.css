@@ -1,0 +1,31 @@
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--space-6);
+}
+
+.fullPage {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  opacity: 0;
+  animation: fallback-appear var(--duration-fast) var(--ease-base) 300ms forwards;
+}
+
+@keyframes fallback-appear {
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text {
+    animation: none;
+    opacity: 1;
+  }
+}

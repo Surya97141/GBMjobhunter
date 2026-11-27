@@ -51,14 +51,14 @@ export default function ATSRing({ score = 0 }) {
         </svg>
 
         {/* Score number layered over the SVG */}
-        <div className={styles.scoreOverlay} aria-label={`ATS score: ${score} out of 100`}>
+        <div className={styles.scoreOverlay} aria-label={`Resume completeness: ${score} out of 100`}>
           <motion.span className={styles.scoreValue}>{displayScore}</motion.span>
           <span className={styles.scoreDenom}>/100</span>
         </div>
       </div>
 
-      <span className={styles.label}>ATS Score</span>
-      <span className={styles.sublabel}>Resume keyword match rate</span>
+      <span className={styles.label}>Completeness</span>
+      <span className={styles.sublabel}>Sections and detail found in your resume</span>
 
     </div>
   );

@@ -4,6 +4,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import ATSRing from '../components/dashboard/ATSRing';
+import ResumeSuggestions from '../components/profile/ResumeSuggestions';
+import { initialProfileForm } from '../utils/profileForm';
 import client from '../api/client';
 import styles from './ProfilePage.module.css';
 
@@ -158,7 +160,7 @@ function ScoreHistory({ applications }) {
   if (!data.length) {
     return (
       <p className={styles.emptyNote}>
-        ATS score history appears here once you log applications with a resume uploaded.
+        Keyword match history appears here once you log applications with a resume uploaded.
       </p>
     );
   }
@@ -204,25 +206,40 @@ function ScoreHistory({ applications }) {
 
 // ─── Profile edit form ────────────────────────────────────────────────────────
 
-function ProfileEditForm({ initialUser }) {
-  const [form,   setForm]   = useState({
-    name:                  initialUser?.name                  ?? '',
-    target_role:           initialUser?.target_role           ?? '',
-    target_location:       initialUser?.target_location       ?? '',
-    years_of_experience:   initialUser?.years_of_experience   ?? '',
-    cover_letter_template: initialUser?.cover_letter_template ?? '',
-  });
+function ProfileEditForm({ initialUser, suggestions }) {
+  // Every field is a string: years_of_experience arrives as a number (or null).
+  const [form,   setForm]   = useState(() => initialProfileForm(initialUser));
   const [saving, setSaving] = useState(false);
   const [saved,  setSaved]  = useState(false);
   const [saveError, setSaveError] = useState(null);
+  // Fields filled from resume suggestions and not yet edited by the user.
+  const [fromResume, setFromResume] = useState(() => new Set());
 
   function handleChange(field) {
     return (e) => {
       setSaved(false);
       setSaveError(null);
       setForm(prev => ({ ...prev, [field]: e.target.value }));
+      setFromResume(prev => {
+        if (!prev.has(field)) return prev;
+        const next = new Set(prev);
+        next.delete(field);
+        return next;
+      });
     };
   }
+
+  // Applies reviewed resume suggestions to the form only — nothing is saved here.
+  function applySuggestions(updates) {
+    setSaved(false);
+    setSaveError(null);
+    setForm(prev => ({ ...prev, ...updates }));
+    setFromResume(prev => new Set([...prev, ...Object.keys(updates)]));
+  }
+
+  const resumeBadge = (field) => fromResume.has(field) && (
+    <span className={styles.fromResume}>From resume — review before saving</span>
+  );
 
   async function handleSave(e) {
     e.preventDefault();
@@ -241,6 +258,7 @@ function ProfileEditForm({ initialUser }) {
       };
       await client.put('/users/me', payload);
       setSaved(true);
+      setFromResume(new Set());
     } catch (err) {
       setSaveError(err.response?.data?.message || 'Save failed — please try again.');
     } finally {
@@ -251,9 +269,10 @@ function ProfileEditForm({ initialUser }) {
   return (
     <section className={styles.card}>
       <h2 className={styles.cardTitle}>Profile Details</h2>
+      <ResumeSuggestions suggestions={suggestions} form={form} onApply={applySuggestions} />
       <form className={styles.editForm} onSubmit={handleSave} noValidate>
 
-        <label className={styles.fieldLabel} htmlFor="pf-name">Display Name</label>
+        <label className={styles.fieldLabel} htmlFor="pf-name">Display Name {resumeBadge('name')}</label>
         <input
           id="pf-name"
           className={styles.fieldInput}
@@ -264,7 +283,7 @@ function ProfileEditForm({ initialUser }) {
           autoComplete="name"
         />
 
-        <label className={styles.fieldLabel} htmlFor="pf-role">Target Role</label>
+        <label className={styles.fieldLabel} htmlFor="pf-role">Target Role {resumeBadge('target_role')}</label>
         <input
           id="pf-role"
           className={styles.fieldInput}
@@ -274,7 +293,7 @@ function ProfileEditForm({ initialUser }) {
           placeholder="e.g. Senior Frontend Engineer"
         />
 
-        <label className={styles.fieldLabel} htmlFor="pf-location">Target Location</label>
+        <label className={styles.fieldLabel} htmlFor="pf-location">Target Location {resumeBadge('target_location')}</label>
         <input
           id="pf-location"
           className={styles.fieldInput}
@@ -284,7 +303,7 @@ function ProfileEditForm({ initialUser }) {
           placeholder="e.g. London, Remote"
         />
 
-        <label className={styles.fieldLabel} htmlFor="pf-exp">Years of Experience</label>
+        <label className={styles.fieldLabel} htmlFor="pf-exp">Years of Experience {resumeBadge('years_of_experience')}</label>
         <input
           id="pf-exp"
           className={styles.fieldInput}
@@ -343,29 +362,44 @@ export default function ProfilePage() {
   const [atsScore,     setAtsScore]     = useState(0);
   const [applications, setApplications] = useState([]);
   const [userProfile,  setUserProfile]  = useState(null);
+  const [suggestions,  setSuggestions]  = useState(null);
   const [loading,      setLoading]      = useState(true);
+  // Which requests failed, so a failure isn't shown as "nothing here yet".
+  const [loadErrors,   setLoadErrors]   = useState({});
 
   useEffect(() => {
+    const fail = (key) => (err) => ({ _err: key, status: err.response?.status });
     Promise.all([
-      client.get('/users/me/resume').catch(() => ({ data: null })),
-      client.get('/applications').catch(() => ({ data: null })),
-      client.get('/users/me').catch(() => ({ data: null })),
+      client.get('/users/me/resume').catch(fail('resume')),
+      client.get('/applications').catch(fail('apps')),
+      client.get('/users/me').catch(fail('user')),
     ]).then(([resumeRes, appsRes, meRes]) => {
+      const errs = {};
+      // 404 from the resume endpoint means no resume uploaded yet, not an error.
+      if (resumeRes._err && resumeRes.status !== 404) errs.resume = true;
+      if (appsRes._err) errs.apps = true;
+      if (meRes._err)   errs.user = true;
+
       setResume(resumeRes.data?.data?.resume ?? null);
+      setSuggestions(resumeRes.data?.data?.profile_suggestions ?? null);
       setApplications(appsRes.data?.data?.applications ?? []);
       const user = meRes.data?.data?.user ?? null;
       setAtsScore(user?.ats_score_cache ?? 0);
       setUserProfile(user);
+      setLoadErrors(errs);
     }).finally(() => setLoading(false));
   }, []);
 
   function handleUploaded(data) {
     setResume(data.resume);
-    setAtsScore(data.ats_score ?? 0);
+    setAtsScore(data.completeness_score ?? data.ats_score ?? 0);
+    setSuggestions(data.profile_suggestions ?? null);
+    // A fresh upload replaces whatever failed to load earlier.
+    setLoadErrors(prev => ({ ...prev, resume: false }));
   }
 
   if (loading) {
-    return <div className={styles.page}><p className={styles.loadingText}>Loading profile…</p></div>;
+    return <main className={styles.page}><p className={styles.loadingText} role="status">Loading profile…</p></main>;
   }
 
   return (
@@ -374,7 +408,7 @@ export default function ProfilePage() {
       <header className={styles.pageHeader}>
         <Display as="h1" className={styles.pageTitle}>Profile</Display>
         <p className={styles.pageSubtitle}>
-          Upload your resume to unlock ATS scoring on every application you log.
+          Upload your resume to see a keyword match for every application you log.
         </p>
       </header>
 
@@ -394,21 +428,29 @@ export default function ProfilePage() {
           </section>
 
           <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Resume Quality Score</h2>
+            <h2 className={styles.cardTitle}>Resume completeness</h2>
             <p className={styles.cardHint}>
-              How complete and keyword-rich your resume is. Goes up when you add more skills, experience, and clear role descriptions.
+              A rule-based check of what the parser found: skills, work experience, education and amount of detail.
+              It is not a score from any applicant tracking system and does not predict screening results.
             </p>
-            <div className={styles.ringWrap}>
-              <ATSRing score={atsScore} />
-            </div>
+            {loadErrors.user ? (
+              <p className={styles.loadError} role="alert">Could not load your score. Try reloading the page.</p>
+            ) : (
+              <div className={styles.ringWrap}>
+                <ATSRing score={atsScore} />
+              </div>
+            )}
           </section>
 
           <section className={styles.card}>
-            <h2 className={styles.cardTitle}>ATS Score History</h2>
+            <h2 className={styles.cardTitle}>Keyword match history</h2>
             <p className={styles.cardHint}>
-              Keyword match % between your resume and each job description you applied to.
+              For each application: the share of the job description&apos;s keywords that also appear in your resume.
+              It measures word overlap only; it is not an ATS vendor&apos;s score or a prediction of screening outcomes.
             </p>
-            <ScoreHistory applications={applications} />
+            {loadErrors.apps
+              ? <p className={styles.loadError} role="alert">Could not load your applications. Try reloading the page.</p>
+              : <ScoreHistory applications={applications} />}
           </section>
 
         </div>
@@ -416,9 +458,24 @@ export default function ProfilePage() {
         {/* Right column: profile edit + extracted resume data */}
         <div className={styles.rightCol}>
 
-          <ProfileEditForm initialUser={userProfile} />
+          {loadErrors.user ? (
+            <section className={styles.card}>
+              <h2 className={styles.cardTitle}>Profile Details</h2>
+              <p className={styles.loadError} role="alert">
+                Could not load your saved profile details. Reload the page before editing so nothing is overwritten.
+              </p>
+            </section>
+          ) : (
+            <ProfileEditForm initialUser={userProfile} suggestions={suggestions} />
+          )}
 
-          {resume ? (
+          {loadErrors.resume ? (
+            <div className={styles.noResume}>
+              <p className={styles.loadError} role="alert">
+                Could not load your resume details. Try reloading the page.
+              </p>
+            </div>
+          ) : resume ? (
             <>
               <section className={styles.card}>
                 <h2 className={styles.cardTitle}>Extracted Skills</h2>

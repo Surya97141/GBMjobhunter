@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-base);
+  background: var(--bg-primary);
   padding: 24px;
 }
 
@@ -61,7 +61,7 @@
 .input {
   width: 100%;
   padding: 10px 14px;
-  background: var(--bg-base);
+  background: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   color: var(--text-primary);
@@ -95,7 +95,8 @@
   width: 100%;
   padding: 12px;
   background: var(--accent);
-  color: #fff;
+  /* --text-inverse is black in obsidian: 7.7:1 on the accent (white was 2.7:1) */
+  color: var(--text-inverse);
   border: none;
   border-radius: 8px;
   font-size: 14px;

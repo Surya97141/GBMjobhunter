@@ -24,4 +24,18 @@ async function getUserSkills(userId) {
   return Array.isArray(skills) ? skills : [];
 }
 
-module.exports = { getCompanySignals, getUserSkills };
+// The minimum profile context sent to an AI provider for guidance: resume
+// skills and target role. Nothing else from the profile or resume text.
+async function getUserAiContext(userId) {
+  const { rows } = await pool.query(
+    'SELECT resume_json, target_role FROM users WHERE id = $1',
+    [userId]
+  );
+  const skills = rows[0]?.resume_json?.skills;
+  return {
+    skills:     Array.isArray(skills) ? skills : [],
+    targetRole: rows[0]?.target_role || null,
+  };
+}
+
+module.exports = { getCompanySignals, getUserSkills, getUserAiContext };

@@ -70,7 +70,7 @@
 
   --text-primary:      #1a1814;
   --text-secondary:    #6b6560;
-  --text-muted:        #b5b0a8;
+  --text-muted:        #736d66; /* ≥4.5:1 on bg-primary, bg-surface and bg-card */
   --text-inverse:      #ffffff;
 
   --accent:            #c17f3a;

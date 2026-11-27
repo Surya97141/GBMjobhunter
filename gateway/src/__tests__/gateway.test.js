@@ -16,7 +16,8 @@ const axios   = require('axios');
 // Rate limiting itself is express-rate-limit's job; we test our routing here.
 jest.mock('../middleware/rateLimiter.middleware', () => {
   const pass = (_req, _res, next) => next();
-  return { standardLimiter: pass, resumeUploadLimiter: pass, demoLimiter: pass };
+  // aiLimiter is a spy so tests can check which routes it is applied to.
+  return { standardLimiter: pass, resumeUploadLimiter: pass, demoLimiter: pass, aiLimiter: jest.fn(pass) };
 });
 jest.mock('../utils/redis', () => ({}));
 
@@ -24,6 +25,7 @@ jest.mock('../utils/redis', () => ({}));
 jest.mock('axios');
 
 const app = require('../../index');
+const { aiLimiter } = require('../middleware/rateLimiter.middleware');
 
 const sign = (opts = {}, secret = process.env.JWT_SECRET) =>
   jwt.sign({ sub: 'user-uuid-1', email: 'a@b.com' }, secret, opts);
@@ -123,6 +125,20 @@ describe('Routing to upstream services', () => {
     expect(res.body.message).toBe('nope');
   });
 
+  it('gives agent (AI) requests a longer upstream timeout than other routes', async () => {
+    await request(app).get('/applications').set('Authorization', `Bearer ${sign()}`);
+    await request(app).post('/agent/ai/opportunity-guidance').set('Authorization', `Bearer ${sign()}`).send({});
+    expect(axios.mock.calls[0][0].timeout).toBe(9000);
+    expect(axios.mock.calls[1][0].timeout).toBe(30000);
+  });
+
+  it('relays the AI request body to the agent service unchanged', async () => {
+    const body = { ai: { mode: 'byok', provider: 'openai', apiKey: 'sk-test-relay-key-1234567890' }, recommendations: [] };
+    await request(app).post('/agent/ai/opportunity-guidance').set('Authorization', `Bearer ${sign()}`).send(body);
+    expect(axios.mock.calls[0][0].url).toBe('http://agent.test/agent/ai/opportunity-guidance');
+    expect(axios.mock.calls[0][0].data).toEqual(body);
+  });
+
   it('returns 502 when the upstream service is unreachable', async () => {
     axios.mockRejectedValue(new Error('ECONNREFUSED'));
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -154,6 +170,112 @@ describe('Demo signup route', () => {
 
     expect(res.status).toBe(201);
     expect(axios.mock.calls[0][0].url).toBe('http://user.test/auth/demo');
+  });
+});
+
+describe('AI rate limit scoping', () => {
+  const auth = () => `Bearer ${sign()}`;
+
+  it.each([
+    '/agent/ai/opportunity-guidance',
+    '/agent/explain-hiring-process',
+    '/agent/generate-cover-letter',
+    '/agent/generate-outreach',
+  ])('applies the AI limit to the model call POST %s', async (path) => {
+    await request(app).post(path).set('Authorization', auth()).send({});
+    expect(aiLimiter).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not apply the AI limit to the AI status check', async () => {
+    const res = await request(app).get('/agent/ai/status').set('Authorization', auth());
+    expect(res.status).toBe(200);
+    expect(aiLimiter).not.toHaveBeenCalled();
+    expect(axios.mock.calls[0][0].url).toBe('http://agent.test/agent/ai/status');
+  });
+
+  it('does not apply the AI limit to the agent health check', async () => {
+    await request(app).get('/agent/health').set('Authorization', auth());
+    expect(aiLimiter).not.toHaveBeenCalled();
+  });
+
+  it('does not apply the AI limit to non-model routes elsewhere', async () => {
+    await request(app).get('/applications').set('Authorization', auth());
+    await request(app).get('/opportunities').set('Authorization', auth());
+    expect(aiLimiter).not.toHaveBeenCalled();
+  });
+
+  it('still blocks a model call when the AI limit rejects it', async () => {
+    aiLimiter.mockImplementationOnce((_req, res) => res.status(429).json({ success: false, error: 'rate_limited' }));
+    const res = await request(app).post('/agent/ai/opportunity-guidance').set('Authorization', auth()).send({});
+    expect(res.status).toBe(429);
+    expect(axios).not.toHaveBeenCalled();
+  });
+});
+
+describe('Malformed request bodies', () => {
+  // A fake key left unquoted: for this kind of syntax error, Node's JSON.parse
+  // message quotes the surrounding body text ('Unexpected token 's', ..."apiKey":
+  // sk-FAKEKEY"... is not valid JSON'), so a leak of the message leaks the key.
+  const FAKE_KEY = 'sk-FAKEKEYFRAGMENT-0123456789abcdef';
+  // Node shows only ~10 characters of context, so check for a short fragment.
+  const FRAGMENT = 'FAKEKEY';
+  const BROKEN   = `{"ai":{"mode":"byok","provider":"openai","apiKey": ${FAKE_KEY}}}`;
+
+  // Express's default error handler is silent when env is 'test' (Jest's
+  // default). Run these as 'development', where it would log err.stack and
+  // return it, so the tests fail if the gateway's own handler is ever removed.
+  let previousEnv;
+  beforeAll(() => { previousEnv = app.get('env'); app.set('env', 'development'); });
+  afterAll(() => { app.set('env', previousEnv); });
+
+  function captureLogs() {
+    const lines = [];
+    const spies = ['log', 'info', 'warn', 'error', 'debug'].map(level =>
+      jest.spyOn(console, level).mockImplementation((...args) => {
+        lines.push(args.map(a => (a instanceof Error ? `${a.message}\n${a.stack}` : String(a))).join(' '));
+      }));
+    spies.push(jest.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      lines.push(String(chunk));
+      return true;
+    }));
+    // Restore only these spies (restoreAllMocks would also reset the aiLimiter spy).
+    return { lines, restore: () => spies.forEach(s => s.mockRestore()) };
+  }
+
+  it('returns a fixed 400 and never logs or echoes the body (AI route)', async () => {
+    const logs = captureLogs();
+    try {
+      const res = await request(app)
+        .post('/agent/ai/opportunity-guidance')
+        .set('Authorization', `Bearer ${sign()}`)
+        .set('Content-Type', 'application/json')
+        .send(BROKEN);
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({ status: 'error', message: 'Request body must be valid JSON' });
+      expect(res.text).not.toContain(FRAGMENT);
+      expect(res.text).not.toContain('apiKey');
+      expect(logs.lines.join('\n')).not.toContain(FRAGMENT);
+      expect(axios).not.toHaveBeenCalled();
+    } finally {
+      logs.restore();
+    }
+  });
+
+  it('handles a malformed body on a public route the same way', async () => {
+    const logs = captureLogs();
+    try {
+      const res = await request(app)
+        .post('/auth/login')
+        .set('Content-Type', 'application/json')
+        .send(`{"email":"a@b.com","password": ${FAKE_KEY}}`);
+      expect(res.status).toBe(400);
+      expect(res.text).not.toContain(FRAGMENT);
+      expect(logs.lines.join('\n')).not.toContain(FRAGMENT);
+    } finally {
+      logs.restore();
+    }
   });
 });
 
