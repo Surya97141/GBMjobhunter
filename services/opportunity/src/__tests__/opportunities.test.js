@@ -40,4 +40,26 @@ describe('buildRecommendations', () => {
     const recs = await buildRecommendations([], []);
     expect(recs.length).toBeLessThanOrEqual(10);
   });
+
+  // The AI planner is optional: with no AI configured anywhere, the
+  // deterministic engine must give the same results it always has.
+  it('works without any AI configuration and is repeatable', async () => {
+    const saved = {};
+    for (const k of ['GROQ_API_KEY', 'OPENAI_API_KEY', 'TIER2_API_KEY', 'TIER3_API_KEY', 'AGENT_SERVICE_URL']) {
+      saved[k] = process.env[k];
+      delete process.env[k];
+    }
+    try {
+      const first  = await buildRecommendations(['JavaScript', 'SQL'], []);
+      const second = await buildRecommendations(['JavaScript', 'SQL'], []);
+      expect(first.length).toBeGreaterThan(0);
+      expect(second).toEqual(first);
+      for (const r of first) {
+        expect(r.dataSource).toBe('heuristic');
+        for (const c of r.courses) expect(c.url).toMatch(/^https:\/\//);
+      }
+    } finally {
+      for (const [k, v] of Object.entries(saved)) if (v !== undefined) process.env[k] = v;
+    }
+  });
 });

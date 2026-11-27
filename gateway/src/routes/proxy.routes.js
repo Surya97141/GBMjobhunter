@@ -111,6 +111,8 @@ router.use('/opportunities', requireAuth, standardLimiter, forward(process.env.O
 // than the agent's own provider timeout (AI_TIMEOUT_MS, default 25 s).
 const AGENT_MODEL_ROUTES = new Set([
   '/ai/opportunity-guidance',
+  '/ai/opportunity-plan',
+  '/ai/opportunity-followup',
   '/explain-hiring-process',
   '/generate-cover-letter',
   '/generate-outreach',

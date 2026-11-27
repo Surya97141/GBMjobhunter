@@ -178,6 +178,8 @@ describe('AI rate limit scoping', () => {
 
   it.each([
     '/agent/ai/opportunity-guidance',
+    '/agent/ai/opportunity-plan',
+    '/agent/ai/opportunity-followup',
     '/agent/explain-hiring-process',
     '/agent/generate-cover-letter',
     '/agent/generate-outreach',

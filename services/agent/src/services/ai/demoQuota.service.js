@@ -43,4 +43,18 @@ async function consumeDemoQuota(userId) {
   return null;
 }
 
-module.exports = { consumeDemoQuota, perUserLimit, totalLimit };
+// Follow-up questions on the Opportunities page: a per-user hourly cap on top
+// of the gateway's per-minute AI limit, for demo and own-key requests alike.
+const followupLimitPerHour = () => Number(process.env.AI_FOLLOWUP_LIMIT_PER_HOUR) || 20;
+
+// Returns null when allowed, or 'followup_limit'. Throws if Redis is
+// unreachable; the caller fails closed.
+async function consumeFollowupAllowance(userId) {
+  const hour = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH, UTC
+  const key = `ai_followup:user:${userId}:${hour}`;
+  const count = await redis().incr(key);
+  if (count === 1) await redis().expire(key, 3600);
+  return count > followupLimitPerHour() ? 'followup_limit' : null;
+}
+
+module.exports = { consumeDemoQuota, consumeFollowupAllowance, followupLimitPerHour, perUserLimit, totalLimit };

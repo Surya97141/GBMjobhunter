@@ -98,5 +98,6 @@ module.exports = {
   SYSTEM_PROMPT,
   buildUserMessage,
   sanitiseGuidance,
+  extractJson,
   MAX_ITEMS,
 };

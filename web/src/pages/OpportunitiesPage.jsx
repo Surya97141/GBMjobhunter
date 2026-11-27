@@ -3,6 +3,8 @@ import { Display } from '../components/Typography';
 import client from '../api/client';
 import AiSettingsPanel from '../components/ai/AiSettingsPanel';
 import { useAiSettings } from '../context/AiSettingsContext';
+import { aiFailureMessage } from '../utils/aiFailureMessage';
+import OpportunityPlanner from '../components/opportunities/OpportunityPlanner';
 import styles from './OpportunitiesPage.module.css';
 
 // ─── Hidden Curriculum Decoder ────────────────────────────────────────────────
@@ -26,16 +28,6 @@ function extractText(result) {
   const tier3 = result.data?.content?.[0]?.text;
   if (typeof tier3 === 'string' && tier3.trim()) return tier3.trim();
   return '';
-}
-
-// Messages for failed AI requests. Server messages for these codes are fixed
-// strings written by the backend (never provider text), so they are safe to show.
-function aiFailureMessage(err) {
-  const status = err?.response?.status;
-  if (status === 429) return err.response.data?.message || 'Too many AI requests. Wait a minute and try again.';
-  if (status === 400 && err.response.data?.error === 'provider_disabled') return err.response.data.message;
-  if (err?.code === 'ECONNABORTED') return 'The AI request took too long. Try again.';
-  return 'Could not reach the AI service. Try again in a moment.';
 }
 
 function HiddenCurriculumDecoder() {
@@ -314,17 +306,29 @@ export default function OpportunitiesPage() {
   const [communities,     setCommunities]     = useState([]);
   const [hasSkills,       setHasSkills]       = useState(false);
   const [resumeSkills,    setResumeSkills]    = useState([]);
+  // Parsed resume and profile, kept in memory for the AI planner. Neither is
+  // sent to an AI provider unless the user reviews it and presses Send.
+  const [resume,          setResume]          = useState(null);
+  const [user,            setUser]            = useState(null);
   const [loading,         setLoading]         = useState(true);
   const [error,           setError]           = useState(null);
 
   useEffect(() => {
     async function load() {
       try {
+        // Profile (target role, years) for the AI planner only. Optional.
+        client.get('/users/me')
+          .then(res => setUser(res.data?.data?.user ?? null))
+          .catch(() => {});
+
         // Try to personalise by reading the user's parsed resume skills.
         let skillsParam = '';
         try {
           const resumeRes = await client.get('/users/me/resume');
-          const skills    = resumeRes.data?.data?.resume?.skills ?? [];
+          const parsed    = resumeRes.data?.data?.resume ?? null;
+          // Only the parsed fields the planner reads; raw resume text is not kept.
+          if (parsed) setResume({ skills: parsed.skills, workExperience: parsed.workExperience, education: parsed.education });
+          const skills    = parsed?.skills ?? [];
           if (skills.length > 0) {
             skillsParam = `?skills=${encodeURIComponent(skills.join(','))}`;
             setHasSkills(true);
@@ -429,7 +433,14 @@ export default function OpportunitiesPage() {
 
       </div>
 
-      <AiSettingsPanel dataSent="your resume skills and target role, plus the recommended skills (for explanations) or the chosen topic (for the decoder)," />
+      <AiSettingsPanel dataSent="only the data each feature names: the profile you review (personalized opportunities), your resume skills, target role and the recommended skills (explanations), or the chosen topic (decoder)," />
+
+      <OpportunityPlanner
+        resume={resume}
+        user={user}
+        recommendations={recommendations}
+        communities={communities}
+      />
 
       <AiGuidance recommendations={recommendations} />
 
