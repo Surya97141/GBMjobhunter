@@ -461,7 +461,7 @@ Local `.env` files in each service directory (not committed).
 
 ## 21. Testing and CI
 
-- **Run everything:** `npm run lint` (ESLint 9 flat config in `eslint.config.js`: errors fail, warnings don't; mobile is not linted yet), `npm test` (runs each workspace's Jest suite, `--passWithNoTests`) and `npm run build` (web production build).
+- **Run everything:** `npm run lint` (ESLint 9 flat config in `eslint.config.js`: errors fail, warnings don't; mobile is not linted yet), `npm test` (runs each workspace's test script; Jest workspaces pass `--passWithNoTests` themselves, web uses `node --test`) and `npm run build` (web production build).
 - **CI:** `.github/workflows/ci.yml` runs `npm ci`, `npm run lint`, `npm test` and `npm run build` on pushes to `main` and on pull requests. `npm ci` fails if `package-lock.json` is out of sync with any workspace manifest, so run `npm install` after adding a dependency or workspace.
 - **Approach:** Jest + Supertest, with Postgres, Redis, BullMQ and axios mocked. No containers are needed, but the tests do not exercise real SQL.
 - **Coverage:**
