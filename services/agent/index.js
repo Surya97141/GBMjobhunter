@@ -13,6 +13,12 @@ const {
   guidanceRequestSchema, SYSTEM_PROMPT: GUIDANCE_SYSTEM_PROMPT, buildUserMessage, sanitiseGuidance,
 } = require('./src/services/ai/opportunityGuidance.service');
 const { failure } = require('./src/services/ai/errors');
+const { parseProfile } = require('./src/services/ai/aiProfile');
+const {
+  PLAN_SYSTEM_PROMPT, FOLLOWUP_SYSTEM_PROMPT, QUESTION_MAX, planInputSchema,
+  sanitisePlan, sanitisePlanObject, sanitiseFollowup, buildPlanMessage, buildFollowupMessage, parseQuestion,
+} = require('./src/services/ai/opportunityPlan.service');
+const { consumeFollowupAllowance } = require('./src/services/ai/demoQuota.service');
 
 const app    = express();
 const router = express.Router();
@@ -352,6 +358,96 @@ router.post('/ai/opportunity-guidance', asyncHandler(async (req, res) => {
     return res.json({
       success: true,
       guidance,
+      provider: result.provider, providerLabel: result.providerLabel, model: result.model, mode: result.mode,
+    });
+  } catch {
+    return res.json(failure('bad_output'));
+  }
+}));
+
+// ── Personalized opportunities (structured guidance) ─────────────────────────
+// The client sends the processed profile the user reviewed (aiProfile.js rules,
+// re-applied here). Nothing is read from the database for this request, so the
+// provider sees exactly what the user previewed. Output is validated and
+// grounded by opportunityPlan.service.js; nothing here is a job listing.
+router.post('/ai/opportunity-plan', asyncHandler(async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const ai = parseAiOptions(req, res);
+  if (!ai) return;
+
+  const parsedProfile = parseProfile(req.body?.profile);
+  if (!parsedProfile.ok) return res.status(400).json({ status: 'error', message: parsedProfile.message });
+  const { profile } = parsedProfile;
+
+  const result = await runAi({
+    ai, userId, task: 'opportunity_plan',
+    system: PLAN_SYSTEM_PROMPT,
+    user:   buildPlanMessage(profile),
+    maxTokens: 1400,
+    json: true,
+  });
+  if (!result.success) return res.json(result);
+
+  try {
+    const plan = sanitisePlan(result.text, profile);
+    return res.json({
+      success: true, plan, profileUsed: profile,
+      provider: result.provider, providerLabel: result.providerLabel, model: result.model, mode: result.mode,
+    });
+  } catch {
+    return res.json(failure('bad_output'));
+  }
+}));
+
+// One follow-up question, answered only from the processed profile and the
+// guidance already shown. Bounded question length, per-user hourly cap.
+router.post('/ai/opportunity-followup', asyncHandler(async (req, res) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const ai = parseAiOptions(req, res);
+  if (!ai) return;
+
+  const question = parseQuestion(req.body?.question);
+  if (!question) {
+    return res.status(400).json({ status: 'error', message: `question must be 3 to ${QUESTION_MAX} characters` });
+  }
+
+  const parsedProfile = parseProfile(req.body?.profile);
+  if (!parsedProfile.ok) return res.status(400).json({ status: 'error', message: parsedProfile.message });
+  const { profile } = parsedProfile;
+
+  const planShape = planInputSchema.safeParse(req.body?.plan);
+  if (!planShape.success) return res.status(400).json({ status: 'error', message: 'plan is missing or malformed' });
+  let plan;
+  try {
+    plan = sanitisePlanObject(planShape.data, profile);
+  } catch {
+    return res.status(400).json({ status: 'error', message: 'plan does not match the profile' });
+  }
+
+  try {
+    const blocked = await consumeFollowupAllowance(userId);
+    if (blocked) return res.status(429).json(failure(blocked));
+  } catch {
+    return res.json(failure('quota_unavailable'));
+  }
+
+  const result = await runAi({
+    ai, userId, task: 'opportunity_followup',
+    system: FOLLOWUP_SYSTEM_PROMPT,
+    user:   buildFollowupMessage({ profile, plan, question }),
+    maxTokens: 500,
+    json: true,
+  });
+  if (!result.success) return res.json(result);
+
+  try {
+    const reply = sanitiseFollowup(result.text);
+    return res.json({
+      success: true, ...reply,
       provider: result.provider, providerLabel: result.providerLabel, model: result.model, mode: result.mode,
     });
   } catch {

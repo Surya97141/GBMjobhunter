@@ -16,6 +16,7 @@ const MESSAGES = {
   provider_error:       'The provider could not complete this request.',
   refused:              'The model declined this request.',
   bad_output:           'The AI response could not be used. Try again.',
+  followup_limit:       'You have asked the maximum number of follow-up questions for this hour. Try again later.',
 };
 
 class AiError extends Error {
