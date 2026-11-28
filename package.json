@@ -19,7 +19,8 @@
     "backend": "concurrently -n gateway,user,jobs,opportunity,intel,agent -c cyan,green,yellow,blue,magenta,white \"npm run dev --workspace=@gbm/gateway\" \"npm run dev --workspace=@gbm/user-service\" \"npm run dev --workspace=@gbm/jobs-service\" \"npm run dev --workspace=@gbm/opportunity-service\" \"npm run dev --workspace=@gbm/intelligence-service\" \"npm run dev --workspace=@gbm/agent-service\"",
     "web": "npm run dev --workspace=@gbm/web",
     "lint": "eslint .",
-    "test": "npm test --workspaces --if-present",
+    "test": "npm test --workspaces --if-present && npm run test:scripts",
+    "test:scripts": "node --test scripts/__tests__/demo-start.test.js",
     "build": "npm run build --workspace=@gbm/web"
   },
   "devDependencies": {

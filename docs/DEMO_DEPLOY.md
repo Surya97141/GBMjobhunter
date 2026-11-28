@@ -74,10 +74,34 @@ services to the same Render workspace, you may exceed the allowance, so check th
   the migrations and seeding on the next start.
 - **Redis is in-memory.** A restart clears queued jobs and rate-limit counters. `maxmemoryPolicy` is
   `noeviction` because BullMQ would silently lose jobs under eviction.
-- **Memory.** Six Node processes (gateway, four services, the intelligence worker) share one small instance.
-  Five of them used about 330 MB on a Windows dev machine; the agent service was added since, so measure on
-  Render's dashboard after deploying. If it runs out, set `DEMO_RUN_WORKER=false` to drop the intelligence
-  worker (insights are seeded), or `DEMO_RUN_AGENT=false` to drop AI.
+- **Memory.** Seven Node processes share the 512 MB free instance: the launcher, the gateway, the user,
+  jobs, opportunity and agent services, and the intelligence worker. `DEMO_HEAP_MB` (default 96) caps each
+  child's JavaScript heap only. Every Node process also carries roughly 40-50 MB of runtime overhead that
+  the cap does not limit. Measured idle RSS on Linux, Node 22, with no database traffic: agent ≈ 75 MB,
+  jobs ≈ 72, user ≈ 69, opportunity ≈ 65, intelligence ≈ 82. With the gateway and the launcher on top,
+  the total is close to 512 MB before any load, so an out-of-memory restart is a real risk. Check
+  Render's Metrics tab after deploying. If memory runs out, set `DEMO_RUN_WORKER=false` first (insights
+  are seeded; saves ≈ 80 MB), then `DEMO_RUN_AGENT=false` to drop AI (≈ 75 MB). Lowering `DEMO_HEAP_MB`
+  below about 64 risks heap-out-of-memory crashes, and any crash restarts the whole backend.
+- **Agent startup.** The launcher starts the agent on `localhost:3005` and points the gateway's
+  `AGENT_SERVICE_URL` at it. About 30 s after boot it logs either `[demo] agent ready on port 3005` or a
+  warning that the agent did not answer `/agent/health`. The agent does not need `GROQ_API_KEY` to start.
+
+### Launcher environment variables
+
+| Variable | Default | Effect |
+|---|---|---|
+| `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET` | (required) | Startup aborts with a clear message if any is missing |
+| `PORT` | `10000` | Public gateway port (Render sets it) |
+| `GROQ_API_KEY` | unset | Enables the shared demo AI mode; without it bring-your-own-key AI still works |
+| `DEMO_RUN_AGENT` | `true` | `false` skips the agent; `/agent/*` then returns 502 and the UI shows AI as unavailable |
+| `DEMO_RUN_WORKER` | `true` | `false` skips the intelligence worker |
+| `DEMO_HEAP_MB` | `96` | Per-process heap cap; must be a whole number ≥ 16 or startup aborts |
+| `AGENT_SERVICE_URL` | `http://localhost:3005` | Point the gateway at an agent running elsewhere |
+| `TRUST_PROXY` | `1` | Proxy hops in front of the gateway |
+
+Internal ports (3001 user, 3002 jobs, 3003 opportunity, 3005 agent) are fixed in `scripts/demo-start.js`.
+Any host `NODE_OPTIONS` flags are kept; only the heap flag is replaced.
 
 ## What the demo includes
 
