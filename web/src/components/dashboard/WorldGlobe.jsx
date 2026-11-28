@@ -1,33 +1,23 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import Globe from 'react-globe.gl';
 import { useTheme } from '../../context/ThemeContext';
 import client from '../../api/client';
 import { fitAltitude, clampAltitude, zoomAltitude } from '../../utils/globeView';
+import { REGION_COORDINATES } from '../../utils/globeRegions';
+import {
+  GLOBE_TEXTURE_URL, browserSupportsWebGL, globeFailureMessage, demandLoadMessage,
+} from '../../utils/globeSupport';
+import GlobeErrorBoundary from '../insights/GlobeErrorBoundary';
 import styles from './WorldGlobe.module.css';
 
 // react-globe.gl uses Three.js directly — CSS variables don't reach it.
 // Map theme name to raw colour values instead.
+// `point` colours the seeded skill-demand bars; `search` colours the
+// personalized job-board search markers, so the two layers never look alike.
 const THEME_COLORS = {
-  obsidian:  { atmosphere: '#a78bfa', point: '#a78bfa' },
-  cream:     { atmosphere: '#c17f3a', point: '#c17f3a' },
-  extension: { atmosphere: '#4f46e5', point: '#4f46e5' },
-};
-
-// Canonical lat/lng for each region name used in the skill_demand table.
-// New regions can be added here without touching the seeding script.
-const REGION_COORDINATES = {
-  'San Francisco': { lat:  37.7749, lng: -122.4194 },
-  'New York':      { lat:  40.7128, lng:  -74.0060 },
-  'London':        { lat:  51.5074, lng:   -0.1278 },
-  'Berlin':        { lat:  52.5200, lng:   13.4050 },
-  'Amsterdam':     { lat:  52.3676, lng:    4.9041 },
-  'Paris':         { lat:  48.8566, lng:    2.3522 },
-  'Toronto':       { lat:  43.6532, lng:  -79.3832 },
-  'Singapore':     { lat:   1.3521, lng:  103.8198 },
-  'Bangalore':     { lat:  12.9716, lng:   77.5946 },
-  'Sydney':        { lat: -33.8688, lng:  151.2093 },
-  'Dubai':         { lat:  25.2048, lng:   55.2708 },
-  'Tokyo':         { lat:  35.6762, lng:  139.6503 },
+  obsidian:  { atmosphere: '#a78bfa', point: '#a78bfa', search: '#34d399' },
+  cream:     { atmosphere: '#c17f3a', point: '#c17f3a', search: '#5a8a62' },
+  extension: { atmosphere: '#4f46e5', point: '#4f46e5', search: '#16a34a' },
 };
 
 const START_VIEW = { lat: 30, lng: -30 }; // above the Atlantic: Americas and Europe
@@ -65,7 +55,12 @@ function prefersReducedMotion() {
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 }
 
-export default function WorldGlobe() {
+// searchRegions:  regions with personalized job-board searches (empty until
+//                 the user personalizes the map). Drawn as labelled markers,
+//                 a separate layer from the skill-demand bars.
+// selectedRegion: name of the region whose searches are shown below the map.
+// onSelectRegion: called with a region name when its marker is clicked.
+export default function WorldGlobe({ searchRegions = [], selectedRegion = null, onSelectRegion }) {
   const globeRef     = useRef(null);
   const containerRef = useRef(null);
   const zoomedRef    = useRef(false); // true once the user has zoomed manually
@@ -75,12 +70,19 @@ export default function WorldGlobe() {
   // loading | ready | empty | error — so a failed or empty load is explained
   // instead of looking like a globe with nothing to show.
   const [dataState, setDataState] = useState('loading');
+  const [dataError, setDataError] = useState('');
   const [size,      setSize]      = useState({ width: 0, height: 0 });
   const [rotating,  setRotating]  = useState(() => !prefersReducedMotion());
   const [showList,  setShowList]  = useState(false);
+  // Why the 3D map cannot be shown (null while it can). Checked before the
+  // Globe mounts: without WebGL, three.js throws during render.
+  const [failure,   setFailure]   = useState(() => (browserSupportsWebGL() ? null : 'webgl'));
+  const [texture,   setTexture]   = useState('loading'); // loading | ready | error
+  const [globeReady, setGlobeReady] = useState(false);
 
-  const colors = THEME_COLORS[theme] ?? THEME_COLORS.obsidian;
-  const fit    = fitAltitude(size.width, size.height);
+  const colors   = THEME_COLORS[theme] ?? THEME_COLORS.obsidian;
+  const fit      = fitAltitude(size.width, size.height);
+  const listView = showList || failure !== null;
 
   useEffect(() => {
     client.get('/jobs/demand-supply')
@@ -90,12 +92,34 @@ export default function WorldGlobe() {
         setPoints(built);
         setDataState(built.length > 0 ? 'ready' : 'empty');
       })
-      .catch(() => {
-        // Demand-supply data unavailable — globe renders with no points.
+      .catch(err => {
+        console.warn('[insights] skill demand data failed to load:', err?.response?.status ?? err?.message);
         setPoints([]);
+        setDataError(demandLoadMessage(err));
         setDataState('error');
       });
   }, []);
+
+  // Check the texture separately: three.js only logs a failed texture, which
+  // would leave a blank sphere with no explanation.
+  useEffect(() => {
+    if (failure === 'webgl' || typeof Image === 'undefined') return undefined;
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => { if (!cancelled) setTexture('ready'); };
+    img.onerror = () => {
+      if (cancelled) return;
+      console.warn('[insights] globe texture failed to load:', GLOBE_TEXTURE_URL);
+      setTexture('error');
+    };
+    img.src = GLOBE_TEXTURE_URL;
+    return () => { cancelled = true; };
+  }, [failure]);
+
+  const markers = useMemo(() => searchRegions.map(r => ({
+    region: r.region, country: r.country, lat: r.lat, lng: r.lng,
+  })), [searchRegions]);
 
   // react-globe.gl defaults to the full window size; measure the container so
   // the canvas (and therefore the whole globe) fits the space it is given.
@@ -112,7 +136,7 @@ export default function WorldGlobe() {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [showList]); // the container remounts when switching back from the list view
+  }, [listView]); // the container remounts when switching back from the list view
 
   // Keep the whole globe in view when the container size changes.
   useEffect(() => {
@@ -131,6 +155,7 @@ export default function WorldGlobe() {
   function handleGlobeReady() {
     const g = globeRef.current;
     if (!g) return;
+    setGlobeReady(true);
     const controls = g.controls();
     controls.autoRotate      = rotating;
     controls.autoRotateSpeed = 0.4;
@@ -189,6 +214,26 @@ export default function WorldGlobe() {
     moveTo({ lat: point.lat, lng: point.lng, altitude: clampAltitude(fit * 0.6, fit) }, 600);
   }
 
+  function handleMarkerClick(marker) {
+    handlePointClick(marker);
+    onSelectRegion?.(marker.region);
+  }
+
+  // A region chosen from the list below the map: turn the globe to face it.
+  useEffect(() => {
+    if (!selectedRegion || !globeReady || listView) return;
+    const coords = REGION_COORDINATES[selectedRegion];
+    if (!coords) return;
+    zoomedRef.current = true;
+    setRotating(false);
+    moveTo({ lat: coords.lat, lng: coords.lng, altitude: clampAltitude(fit * 0.6, fit) }, 600);
+  }, [selectedRegion, globeReady, listView, fit, moveTo]);
+
+  function handleGlobeError(reason) {
+    setGlobeReady(false);
+    setFailure(reason === 'chunk' ? 'render' : reason);
+  }
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.toolbar} role="toolbar" aria-label="Globe controls">
@@ -197,25 +242,40 @@ export default function WorldGlobe() {
           className={styles.control}
           onClick={() => setRotating(r => !r)}
           aria-pressed={!rotating}
-          disabled={showList}
+          disabled={listView}
         >
           {rotating ? 'Pause rotation' : 'Resume rotation'}
         </button>
-        <button type="button" className={styles.control} onClick={() => zoom('in')}  disabled={showList} aria-label="Zoom in">+</button>
-        <button type="button" className={styles.control} onClick={() => zoom('out')} disabled={showList} aria-label="Zoom out">−</button>
-        <button type="button" className={styles.control} onClick={resetView} disabled={showList}>Reset view</button>
+        <button type="button" className={styles.control} onClick={() => zoom('in')}  disabled={listView} aria-label="Zoom in">+</button>
+        <button type="button" className={styles.control} onClick={() => zoom('out')} disabled={listView} aria-label="Zoom out">−</button>
+        <button type="button" className={styles.control} onClick={resetView} disabled={listView}>Reset view</button>
         <button
           type="button"
           className={`${styles.control} ${styles.listToggle}`}
           onClick={() => setShowList(v => !v)}
-          aria-pressed={showList}
-          disabled={dataState !== 'ready'}
+          aria-pressed={listView}
+          disabled={dataState !== 'ready' || failure !== null}
         >
-          {showList ? 'Show globe' : 'Show as list'}
+          {listView ? 'Show globe' : 'Show as list'}
         </button>
       </div>
 
-      {showList ? (
+      {failure && (
+        <p className={`${styles.notice} ${styles.noticeError}`} role="alert">
+          {globeFailureMessage(failure)}
+        </p>
+      )}
+      {!failure && texture === 'error' && (
+        <p className={styles.notice} role="status">{globeFailureMessage('texture')}</p>
+      )}
+
+      {listView && dataState !== 'ready' ? (
+        <p className={`${styles.notice} ${dataState === 'error' ? styles.noticeError : ''}`} role={dataState === 'error' ? 'alert' : 'status'}>
+          {dataState === 'loading' && 'Loading skill demand data…'}
+          {dataState === 'empty'   && 'No skill demand data is available yet.'}
+          {dataState === 'error'   && dataError}
+        </p>
+      ) : listView ? (
         <div className={styles.listWrap}>
           <table className={styles.table}>
             <caption className={styles.caption}>Skill demand by region, highest demand score first</caption>
@@ -247,16 +307,21 @@ export default function WorldGlobe() {
           className={styles.container}
           tabIndex={0}
           role="group"
-          aria-label="Skill demand globe. Drag to rotate. Arrow keys rotate, plus and minus zoom, 0 resets the view."
+          aria-label={
+            'Skill demand globe. Drag to rotate. Arrow keys rotate, plus and minus zoom, 0 resets the view.' +
+            (markers.length ? ' Labelled markers open job-board searches; the same regions are listed below the map.' : '')
+          }
           onKeyDown={handleKeyDown}
         >
           {size.width > 0 && (
+            <GlobeErrorBoundary onError={handleGlobeError} fallback={() => null}>
             <Globe
               ref={globeRef}
               width={size.width}
               height={size.height}
               onGlobeReady={handleGlobeReady}
-              globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+              globeImageUrl={texture === 'ready' ? GLOBE_TEXTURE_URL : null}
+              showGraticules={texture === 'error'}
               backgroundColor="rgba(0,0,0,0)"
               atmosphereColor={colors.atmosphere}
               atmosphereAltitude={0.18}
@@ -272,7 +337,23 @@ export default function WorldGlobe() {
                 `</span>`
               }
               onPointClick={handlePointClick}
+              labelsData={markers}
+              labelLat="lat"
+              labelLng="lng"
+              labelText="region"
+              labelSize={(m) => (m.region === selectedRegion ? 1.6 : 1.1)}
+              labelDotRadius={(m) => (m.region === selectedRegion ? 0.9 : 0.6)}
+              labelColor={() => colors.search}
+              labelResolution={2}
+              labelAltitude={0.01}
+              labelLabel={(m) =>
+                `<span style="font-family:sans-serif;font-size:12px;padding:4px 8px;background:rgba(0,0,0,0.75);border-radius:4px;color:#fff">` +
+                `${escapeHtml(m.region)}: click for job-board searches` +
+                `</span>`
+              }
+              onLabelClick={handleMarkerClick}
             />
+            </GlobeErrorBoundary>
           )}
           {dataState !== 'ready' && (
             <p
@@ -281,7 +362,7 @@ export default function WorldGlobe() {
             >
               {dataState === 'loading' && 'Loading skill demand data…'}
               {dataState === 'empty'   && 'No skill demand data is available yet.'}
-              {dataState === 'error'   && 'Skill demand data could not be loaded. Try reloading the page.'}
+              {dataState === 'error'   && dataError}
             </p>
           )}
         </div>

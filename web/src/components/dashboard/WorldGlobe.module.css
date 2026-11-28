@@ -146,3 +146,21 @@
   color: var(--color-low);
   border-color: var(--color-low);
 }
+
+/* Map-level notices (WebGL/texture failure, data state in list view) */
+.notice {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.noticeError {
+  color: var(--color-low);
+  border-color: var(--color-low);
+}
